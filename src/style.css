@@ -1,0 +1,125 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+  --num-cols: 4;
+  --grid-border-color: #555;
+}
+
+.rotate-90 {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: rotate(90deg);
+}
+
+.rotate-180 {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: rotate(180deg);
+}
+
+.rotate-270 {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: rotate(270deg);
+}
+
+.fill {
+  display: none;
+}
+
+.path-oil-bend {
+  stroke-dasharray: 160;
+  stroke-dashoffset: 160;
+  animation: dash 3s linear forwards;
+  animation-iteration-count: 1;
+}
+
+.path-oil {
+  stroke-dasharray: 200;
+  stroke-dashoffset: 200;
+  animation: dash 3s linear forwards;
+  animation-iteration-count: 1;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+#grid {
+  display: grid;
+  border-top: 1px solid var(--grid-border-color);
+  border-left: 1px solid var(--grid-border-color);
+  grid-template-columns: repeat(var(--num-cols), 1fr);
+  margin: 20px;
+}
+
+#grid > div {
+  height: 100px;
+  width: 100px;
+  font-size: 0;
+  position: relative;
+  box-sizing: border-box;
+  border-right: 1px solid var(--grid-border-color);
+  border-bottom: 1px solid var(--grid-border-color);
+}
+
+#grid > div:hover {
+  background: rgba(255, 105, 180, 0.2);
+}
+
+#upcoming-pipes {
+  border-top: 1px solid var(--grid-border-color);
+  border-left: 1px solid var(--grid-border-color);
+  grid-template-columns: repeat(6, 1fr);
+  margin: 20px;
+  width: fit-content;
+  display: flex;
+}
+
+#upcoming-pipes > div {
+  height: 50px;
+  width: 50px;
+  font-size: 0;
+  box-sizing: border-box;
+  border-right: 1px solid var(--grid-border-color);
+  border-bottom: 1px solid var(--grid-border-color);
+}
+
+#grid > div > div.label {
+  font-size: 8px;
+  position: absolute;
+  text-align: center;
+  font-weight: bold;
+  padding: 4px;
+  top: 50%;
+  left: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 5;
+  transform: translate(-50%, -50%);
+}
