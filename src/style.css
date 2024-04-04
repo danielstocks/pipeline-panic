@@ -1,11 +1,46 @@
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
+  line-height: 1.4;
   font-weight: 400;
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
   --num-cols: 4;
   --grid-border-color: #555;
+}
+body {
+  margin: 0;
+  display: flex;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.fill {
+  display: none;
+}
+
+.fill-pipe .fill {
+  display: block;
+}
+
+.fill-pipe-animate .fill {
+  display: block;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: dash 1000ms linear forwards;
+}
+
+.fill-pipe-animate .start-tile .fill {
+  display: block;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: dash 500ms linear forwards;
+  animation-delay: 500ms;
 }
 
 .rotate-90 {
@@ -26,35 +61,20 @@
   transform: rotate(270deg);
 }
 
-.fill {
-  display: none;
+.flip-180 {
+  transform: scaleX(-1) rotate(180deg);
 }
 
-.path-oil-bend {
-  stroke-dasharray: 160;
-  stroke-dashoffset: 160;
-  animation: dash 3s linear forwards;
-  animation-iteration-count: 1;
+.flip-90 {
+  transform: scaleX(-1) rotate(90deg);
 }
 
-.path-oil {
-  stroke-dasharray: 200;
-  stroke-dashoffset: 200;
-  animation: dash 3s linear forwards;
-  animation-iteration-count: 1;
+.flip-270 {
+  transform: scaleX(-1) rotate(270deg);
 }
 
-@keyframes dash {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-body {
-  margin: 0;
-  display: flex;
-  min-width: 320px;
-  min-height: 100vh;
+.flip {
+  transform: scaleX(-1);
 }
 
 #grid {
@@ -66,9 +86,10 @@ body {
 }
 
 #grid > div {
-  height: 100px;
-  width: 100px;
+  height: 80px;
+  width: 80px;
   font-size: 0;
+  cursor: cell;
   position: relative;
   box-sizing: border-box;
   border-right: 1px solid var(--grid-border-color);
@@ -89,23 +110,24 @@ body {
 }
 
 #upcoming-pipes > div {
-  height: 50px;
-  width: 50px;
+  height: 40px;
+  width: 40px;
   font-size: 0;
   box-sizing: border-box;
   border-right: 1px solid var(--grid-border-color);
   border-bottom: 1px solid var(--grid-border-color);
 }
 
-#grid > div > div.label {
-  font-size: 8px;
+#grid div.label {
+  font-size: 10px;
   position: absolute;
   text-align: center;
   font-weight: bold;
-  padding: 4px;
+  padding: 4px 8px;
+  margin-top: -10px;
   top: 50%;
   left: 50%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 1);
   z-index: 5;
   transform: translate(-50%, -50%);
 }

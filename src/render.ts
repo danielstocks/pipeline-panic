@@ -1,84 +1,129 @@
 import { bend, straight, short, cross } from "./pipes";
 import { GRID_COLS, GRID_ROWS } from "./config";
-import { getRandomItemFromArray } from "./util";
 
-const startingDirection = getRandomItemFromArray(["s", "w", "n", "e"]);
-const endingDirection = getRandomItemFromArray(["s", "w", "n", "e"]);
-
-const angles: {
-  [key: string]: number;
-} = {
-  s: 0,
-  w: 90,
-  n: 180,
-  e: 270,
-};
-
-export function renderUpcomingPipes({
-  upcomingPipes,
-}: {
-  upcomingPipes: string[];
-}) {
+export function renderUpcomingPipes(upcomingPipes: string[]) {
   return upcomingPipes
     .map((pipe) => {
       return `<div>
-      ${(pipe == "se" && bend) || ""}
-      ${(pipe == "ne" && `<div class="rotate-270">${bend}</div>`) || ""}  
-      ${(pipe == "nw" && `<div class="rotate-180">${bend}</div>`) || ""}
-      ${(pipe == "sw" && `<div class="rotate-90">${bend}</div>`) || ""}
-      ${(pipe == "v" && straight) || ""}
-      ${(pipe == "h" && `<div class="rotate-90">${straight}</div>`) || ""}
-      ${(pipe == "c" && cross) || ""}
+      ${pipe == "se" && bend}
+      ${pipe == "v" && straight}
+      ${pipe == "c" && cross}
+      ${pipe == "ne" && `<div class="rotate-270">${bend}</div>`}  
+      ${pipe == "nw" && `<div class="rotate-180">${bend}</div>`}
+      ${pipe == "sw" && `<div class="rotate-90">${bend}</div>`}
+      ${pipe == "h" && `<div class="rotate-90">${straight}</div>`}
       </div>`;
     })
     .join("");
 }
 
-export function renderGrid({
-  grid,
-  startCol,
-  startRow,
-  endCol,
-  endRow,
-}: {
-  grid: Map<any, any>;
-  startRow: number;
-  startCol: number;
-  endRow: number;
-  endCol: number;
-}) {
+function renderTile(
+  row: number,
+  col: number,
+  children: string = "",
+  className: string = ""
+) {
+  return `<div class="tile ${className}" data-row="${row}" data-col="${col}">${children}</div>`;
+}
+
+type tile = {
+  pipe: string;
+  direction?: string;
+};
+
+export function renderPipe(
+  tile: tile,
+  row: number,
+  col: number,
+  animate: boolean
+) {
+  let output = "";
+  let fill = "";
+
+  if (animate) {
+    fill = "fill-pipe-animate";
+  }
+
+  switch (tile.pipe) {
+    case "start":
+      output += `<div class="start-tile">
+      <div class="label">s</div>
+      <div class="">${short}</div>
+    </div>`;
+      break;
+    case "end":
+      output += `<div>
+        <div class="label">E</div>
+        <div class="">${short}</div>
+      </div>`;
+      break;
+    case "se":
+      if (tile.direction == "e") {
+        output += `<div class="flip-90">${bend}</div>`;
+      } else {
+        output += bend;
+      }
+      break;
+    case "ne":
+      if (tile.direction === "n") {
+        output += `<div class="flip-180">${bend}</div>`;
+      } else {
+        output += `<div class="rotate-270">${bend}</div>`;
+      }
+      break;
+    case "nw":
+      if (tile.direction === "w") {
+        output += `<div class="flip-270">${bend}</div>`;
+      } else {
+        output += `<div class="rotate-180">${bend}</div>`;
+      }
+      break;
+    case "sw":
+      if (tile.direction === "s") {
+        output += `<div class="flip">${bend}</div>`;
+      } else {
+        output += `<div class="rotate-90">${bend}</div>`;
+      }
+      break;
+    case "v":
+      if (tile.direction === "n") {
+        output += `<div class="rotate-180">${straight}</div>`;
+      } else {
+        output += straight;
+      }
+      break;
+    case "h":
+      if (tile.direction === "e") {
+        output += `<div class="rotate-270">${straight}</div>`;
+      } else {
+        output += `<div class="rotate-90">${straight}</div>`;
+      }
+      break;
+    case "c":
+      output += cross;
+      break;
+  }
+
+  return renderTile(row, col, output, fill);
+}
+
+export function renderGrid(
+  grid: Map<string, tile>,
+  nextTilePosition: string | undefined
+) {
   let gridOutput = "";
 
   for (let i = 0; i < GRID_ROWS * GRID_COLS; i++) {
     let row = Math.floor(i / GRID_COLS);
     let col = i % GRID_COLS;
-    let pipe = grid.get(`${row},${col}`) || "";
+    let tile = grid.get(`${row},${col}`);
 
-    let isStart = startRow == row && startCol == col;
-    let isEnd = endRow == row && endCol == col;
+    let animate = nextTilePosition == `${row},${col}`;
 
-    if (isStart) {
-      gridOutput += `<div>
-          <div class="label">S</div>
-          <div class="rotate-${angles[startingDirection]}">${short}</div>
-        </div>`;
-    } else if (isEnd) {
-      gridOutput += `<div>
-          <div class="label">E</div>
-          <div class="rotate-${angles[endingDirection]}">${short}</div>
-        </div>`;
+    if (typeof tile === "undefined") {
+      gridOutput += renderTile(row, col);
     } else {
-      gridOutput += `<div class="tile" data-row="${row}" data-col="${col}">
-      ${(pipe == "se" && bend) || ""}
-      ${(pipe == "ne" && `<div class="rotate-270">${bend}</div>`) || ""}  
-      ${(pipe == "nw" && `<div class="rotate-180">${bend}</div>`) || ""}
-      ${(pipe == "sw" && `<div class="rotate-90">${bend}</div>`) || ""}
-      ${(pipe == "v" && straight) || ""}
-      ${(pipe == "h" && `<div class="rotate-90">${straight}</div>`) || ""}
-      ${(pipe == "c" && cross) || ""}
-    
-    </div>
-    `;
+      gridOutput += renderPipe(tile, row, col, animate);
     }
   }
 
