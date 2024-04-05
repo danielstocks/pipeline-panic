@@ -23,7 +23,9 @@ function renderTile(
   children: string = "",
   className: string = ""
 ) {
-  return `<div class="tile ${className}" data-row="${row}" data-col="${col}">${children}</div>`;
+  return `<div class="${
+    className || "tile"
+  }" data-row="${row}" data-col="${col}">${children}</div>`;
 }
 
 type tile = {
@@ -118,11 +120,10 @@ export function renderGrid(
     let col = i % GRID_COLS;
     let tile = grid.get(`${row},${col}`);
 
-    let animate = nextTilePosition == `${row},${col}`;
-
     if (typeof tile === "undefined") {
       gridOutput += renderTile(row, col);
     } else {
+      let animate = nextTilePosition == `${row},${col}`;
       gridOutput += renderPipe(tile, row, col, animate);
     }
   }

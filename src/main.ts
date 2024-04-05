@@ -1,12 +1,14 @@
-// TODO: prevent "visited pipes" from being changed
-// TODO: End/start tile direction
-// TODO "winning condition"
-// TODO "Intersection pipes"
+// TODO: "losing - reset game"
+// TODO  "winning - reset game"
+// TODO  "Intersection pipes"
 // TODO: "How to test?"
 // TODO: "blank game state"
 // TODO: 10 second timer to game start
 // TODO: Score
 // TODO: Resume/pause game on tab focus/blur
+
+// In progress:
+// TODO: End/start tile direction
 
 import "./style.css";
 import { renderGrid, renderPipe, renderUpcomingPipes } from "./render";
@@ -235,6 +237,11 @@ gridEl.addEventListener("click", function (event) {
       }
       const row = parseFloat(tile.dataset.row || "");
       const col = parseFloat(tile.dataset.col || "");
+      let existingTile = grid.get(`${row},${col}`);
+      // Don't allow replacing tiles that have been visited
+      if (existingTile && existingTile.direction) {
+        return;
+      }
       grid.set(`${row},${col}`, { pipe: nextPipe });
       tile.outerHTML = renderPipe({ pipe: nextPipe }, row, col, false);
       upcomingEl.innerHTML = renderUpcomingPipes(upcomingPipes);

@@ -89,13 +89,15 @@ body {
   height: 80px;
   width: 80px;
   font-size: 0;
-  cursor: cell;
   position: relative;
   box-sizing: border-box;
   border-right: 1px solid var(--grid-border-color);
   border-bottom: 1px solid var(--grid-border-color);
 }
 
+#grid > div.tile {
+  cursor: cell;
+}
 #grid > div.tile:hover {
   background: rgba(255, 105, 180, 0.2);
 }
