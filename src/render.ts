@@ -3,7 +3,7 @@ import { GRID_COLS, GRID_ROWS } from "./config";
 
 export function renderUpcomingPipes(upcomingPipes: string[]) {
   return upcomingPipes
-    .map((pipe) => {
+    .map((pipe, i) => {
       return `<div>
       ${pipe == "se" && bend}
       ${pipe == "v" && straight}
@@ -12,6 +12,7 @@ export function renderUpcomingPipes(upcomingPipes: string[]) {
       ${pipe == "nw" && `<div class="rotate-180">${bend}</div>`}
       ${pipe == "sw" && `<div class="rotate-90">${bend}</div>`}
       ${pipe == "h" && `<div class="rotate-90">${straight}</div>`}
+      ${i === upcomingPipes.length - 1 && "<span class='next'>▼</span>"}
       </div>`;
     })
     .join("");
@@ -42,21 +43,21 @@ export function renderPipe(
   let output = "";
   let fill = "";
 
-  if (animate) {
-    fill = "fill-pipe-animate";
-  }
+  console.log(tile);
 
   switch (tile.pipe) {
     case "start":
-      output += `<div class="start-tile">
-      <div class="label">s</div>
-      <div class="">${short}</div>
+      fill = "short";
+      output += `<div class="start-tile ${tile.direction}">
+      <div class="label">S</div>
+      <div class="svg">${short}</div>
     </div>`;
       break;
     case "end":
-      output += `<div>
+      fill = "short";
+      output += `<div class="end-tile ${tile.direction}">
         <div class="label">E</div>
-        <div class="">${short}</div>
+        <div class="svg">${short}</div>
       </div>`;
       break;
     case "se":
@@ -104,6 +105,10 @@ export function renderPipe(
     case "c":
       output += cross;
       break;
+  }
+
+  if (animate) {
+    fill = "fill-pipe-animate";
   }
 
   return renderTile(row, col, output, fill);

@@ -6,6 +6,7 @@
   background-color: #242424;
   --num-cols: 4;
   --grid-border-color: #555;
+  --main-color: #00b78b;
 }
 body {
   margin: 0;
@@ -14,14 +15,51 @@ body {
   min-height: 100vh;
 }
 
+#top {
+  display: flex;
+  font-size: 11px;
+  align-items: center;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
 @keyframes dash {
   to {
     stroke-dashoffset: 0;
   }
 }
 
+#app {
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+}
+
+#score {
+  margin-right: 20px;
+  border: 1px dashed var(--main-color);
+  height: 38px;
+  line-height: 38px;
+  padding: 0 8px;
+}
+
+#countdown {
+  margin-right: 20px;
+  border: 1px dashed var(--main-color);
+  height: 38px;
+  line-height: 38px;
+  padding: 0 8px;
+}
+
 .fill {
   display: none;
+}
+
+#high {
+  font-size: 9px;
+  font-weight: 100;
 }
 
 .fill-pipe .fill {
@@ -41,6 +79,38 @@ body {
   stroke-dashoffset: 1000;
   animation: dash 500ms linear forwards;
   animation-delay: 500ms;
+}
+
+.start-tile.w .svg {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: rotate(90deg);
+}
+.start-tile.e .svg {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: rotate(270deg);
+}
+.start-tile.n .svg {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: rotate(180deg);
+}
+
+.end-tile.w .svg {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: rotate(270deg);
+}
+.end-tile.e .svg {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scaleX(-1) rotate(-180deg);
+}
+.end-tile.n .svg {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: rotate(180deg);
 }
 
 .rotate-90 {
@@ -77,6 +147,42 @@ body {
   transform: scaleX(-1);
 }
 
+@keyframes blink {
+  25% {
+    opacity: 0, 5;
+  }
+  50% {
+    opacity: 0;
+  }
+  75% {
+    opacity: 0.5;
+  }
+}
+
+button {
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--main-color);
+  color: #fff;
+  font-family: "Courier New", Courier, monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  border-radius: 20px;
+  padding: 0 8px;
+}
+button:hover {
+  background: darkolivegreen;
+}
+
+blink {
+  animation-name: blink;
+  color: red;
+  text-shadow: 1px 1px 12px hotpink;
+  animation-iteration-count: infinite;
+  animation-timing-function: cubic-bezier(1, 0, 0, 1);
+  animation-duration: 1s;
+}
+
 #grid {
   display: grid;
   border-top: 1px solid var(--grid-border-color);
@@ -95,11 +201,15 @@ body {
   border-bottom: 1px solid var(--grid-border-color);
 }
 
-#grid > div.tile {
+#grid.game-in-progress > div.tile {
   cursor: cell;
 }
-#grid > div.tile:hover {
+#grid.game-in-progress > div.tile:hover {
   background: rgba(255, 105, 180, 0.2);
+}
+
+#grid.game-over {
+  opacity: 1;
 }
 
 #upcoming-pipes {
@@ -120,13 +230,20 @@ body {
   border-bottom: 1px solid var(--grid-border-color);
 }
 
+#upcoming-pipes .next {
+  font-size: 12px;
+  display: block;
+  letter-spacing: 0px;
+  text-align: center;
+  margin-top: 10px;
+}
+
 #grid div.label {
   font-size: 10px;
   position: absolute;
   text-align: center;
   font-weight: bold;
   padding: 4px 8px;
-  margin-top: -10px;
   top: 50%;
   left: 50%;
   background: rgba(0, 0, 0, 1);
