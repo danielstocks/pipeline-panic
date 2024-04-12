@@ -1,10 +1,8 @@
 // * 0.1 release BACKLOG *
 //------------------------
 // -------- TODAY --------
-// TODO: Bug: End Pipe Doesn't Connect
 // TODO: Bug: "game over" condition too fast.
 // TODO: Bug: Replacing tile is possible without causing game over.
-// TODO  Winning scenario
 // -------- LATER --------
 // TODO: Reset game button
 // TODO  Intersection pipes
@@ -79,7 +77,7 @@ startCol = 1;
 endRow = 2;
 endCol = 4;
 
-const startDirection = "e"; // getRandomItemFromArray(["s", "w", "n", "e"]);
+const startDirection = "s"; // getRandomItemFromArray(["s", "w", "n", "e"]);
 const endDirection = "w"; // getRandomItemFromArray(["s", "w", "n", "e"]);
 
 type tile = {
@@ -105,7 +103,7 @@ const endTile: [string, tile] = [
 const grid = new Map<string, tile>([
   ["2,2", { pipe: "h" }],
   ["2,3", { pipe: "h" }],
-  /*
+
   ["2,1", { pipe: "v" }],
   ["3,1", { pipe: "v" }],
   ["4,1", { pipe: "ne" }],
@@ -125,7 +123,6 @@ const grid = new Map<string, tile>([
   ["2,5", { pipe: "v" }],
   ["3,5", { pipe: "nw" }],
   ["3,4", { pipe: "h" }],
-  */
 ]);
 
 grid.set(...startTile);
@@ -156,6 +153,11 @@ function next(): boolean {
       if (countdownEl !== null) {
         countdownEl.innerHTML = "GOOD JOB - <button>Restart</button>";
       }
+
+      let endTile = visitedTiles[visitedTiles.length - 1];
+      if (endTile) {
+        renderNextTile(`${endTile.position[0]},${endTile.position[1]}`);
+      }
     } else {
       console.log("__ LOSER ___");
       if (countdownEl !== null) {
@@ -180,13 +182,12 @@ function next(): boolean {
 
     let connectingTile = getConnectingTile(nextTile, grid);
 
+    console.log(connectingTile);
+
     if (connectingTile) {
       if (connectingTile.pipe === "end") {
         gameOver = true;
         win = true;
-        renderNextTile(
-          `${connectingTile.position[0]},${connectingTile.position[1]}`
-        );
       }
 
       visitedTiles.push(connectingTile);

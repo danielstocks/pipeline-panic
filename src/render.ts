@@ -1,4 +1,4 @@
-import { bend, straight, short, cross } from "./pipes";
+import { bend, straight, short, shortEnd, cross } from "./pipes";
 import { GRID_COLS, GRID_ROWS } from "./config";
 
 export function renderUpcomingPipes(upcomingPipes: string[]) {
@@ -43,8 +43,6 @@ export function renderPipe(
   let output = "";
   let fill = "";
 
-  console.log(tile);
-
   switch (tile.pipe) {
     case "start":
       fill = "short";
@@ -57,7 +55,7 @@ export function renderPipe(
       fill = "short";
       output += `<div class="end-tile ${tile.direction}">
         <div class="label">E</div>
-        <div class="svg">${short}</div>
+        <div class="svg">${shortEnd}</div>
       </div>`;
       break;
     case "se":

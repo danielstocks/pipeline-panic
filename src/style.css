@@ -74,11 +74,12 @@ body {
 }
 
 .fill-pipe-animate .start-tile .fill {
-  display: block;
-  stroke-dasharray: 1000;
-  stroke-dashoffset: 1000;
   animation: dash 500ms linear forwards;
   animation-delay: 500ms;
+}
+
+.fill-pipe-animate .end-tile .fill {
+  animation: dash 500ms linear forwards;
 }
 
 .start-tile.w .svg {
@@ -100,12 +101,12 @@ body {
 .end-tile.w .svg {
   transform-box: fill-box;
   transform-origin: center;
-  transform: rotate(270deg);
+  transform: rotate(-90deg);
 }
 .end-tile.e .svg {
   transform-box: fill-box;
   transform-origin: center;
-  transform: scaleX(-1) rotate(-180deg);
+  transform: rotate(90deg);
 }
 .end-tile.n .svg {
   transform-box: fill-box;

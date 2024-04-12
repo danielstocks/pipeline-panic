@@ -24,6 +24,11 @@ export const short = svg`
 <path class="fill" pathLength="1000" stroke="#D5665F" stroke-opacity=".8"  stroke-width="40" d="M100 100v100"/>
 `;
 
+export const shortEnd = svg`
+<path class="pipe" stroke="#00B78B" stroke-width="50" d="M100 0v100"/>
+<path class="fill" pathLength="1000" stroke="#D5665F" stroke-opacity=".8" stroke-width="40" d="M100 0v100"/>
+`;
+
 export const cross = svg`
 <path class="pipe" stroke="#00B78B" stroke-width="50" d="M100 0v200M200 100H0"/>
 <path class="fill" pathLength="1000" stroke="#D5665F" stroke-opacity=".8" stroke-width="40" d="M100 2v200M200 100H0"/>
