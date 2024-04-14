@@ -1,5 +1,6 @@
 import { bend, straight, short, shortEnd, cross } from "./pipes";
 import { GRID_COLS, GRID_ROWS } from "./config";
+import { Grid } from "./grid";
 
 export function renderUpcomingPipes(upcomingPipes: string[]) {
   return upcomingPipes
@@ -112,22 +113,18 @@ export function renderPipe(
   return renderTile(row, col, output, fill);
 }
 
-export function renderGrid(
-  grid: Map<string, tile>,
-  nextTilePosition: string | undefined
-) {
+export function renderGrid(tiles: Grid) {
   let gridOutput = "";
 
   for (let i = 0; i < GRID_ROWS * GRID_COLS; i++) {
     let row = Math.floor(i / GRID_COLS);
     let col = i % GRID_COLS;
-    let tile = grid.get(`${row},${col}`);
+    let tile = tiles.get([row, col]);
 
     if (typeof tile === "undefined") {
       gridOutput += renderTile(row, col);
     } else {
-      let animate = nextTilePosition == `${row},${col}`;
-      gridOutput += renderPipe(tile, row, col, animate);
+      gridOutput += renderPipe(tile, row, col, false);
     }
   }
 

@@ -1,48 +1,58 @@
 // * 0.1 release BACKLOG *
 //------------------------
-// -------- TODAY --------
-// TODO: Bug: "game over" condition too fast.
-// TODO: Bug: Replacing tile is possible without causing game over.
-// -------- LATER --------
+// TODO: Major refactor
 // TODO: Reset game button
 // TODO  Intersection pipes
 // TODO: Score
 // TODO: Resume/pause game on tab focus/blur
-// TODO: Major refactor
 // TODO: "How to test?"
+// TODO: Programatically create SVG instead of declaritevly
 // TODO: Graphic/UI/Story enhhancement
 // TODO: Release 0.1
 
 import "./style.css";
 import { renderGrid, renderPipe, renderUpcomingPipes } from "./render";
-import { AVAILABLE_PIPES, GRID_COLS, GRID_ROWS } from "./config";
-import {
-  getRandomItemFromArray,
-  getRandomIntegerBetween,
-  intersect,
-  diff,
-} from "./util";
+import { GRID_COLS } from "./config";
+import { getRandomItemFromArray, intersect, diff } from "./util";
+import { createInitialTiles } from "./create-initial-tiles";
+import { Grid, Tile } from "./grid";
 
-let gameOver = false;
-
-// Initialize game state
-const upcomingPipes = [...Array(6).keys()].map(() => {
-  return getRandomItemFromArray(AVAILABLE_PIPES);
-});
-
-const connectsWith: {
-  [key: string]: string[];
+/*
+ * A map of available pipes and which directions
+ * they can connect with
+ *
+ * h = horizontal
+ * v = vertical
+ * c = cross
+ * ne = north-east
+ * ...
+ */
+const pipes: {
+  [key: string]: ("n" | "e" | "s" | "w")[];
 } = {
-  h: ["e", "w"],
-  v: ["n", "s"],
+  c: ["n", "e", "s", "w"],
   ne: ["n", "e"],
   nw: ["n", "w"],
   sw: ["s", "w"],
   se: ["s", "e"],
+  h: ["e", "w"],
+  v: ["n", "s"],
 };
 
-const dirConnect: {
-  [key: string]: string;
+/*
+ * Creates a list of upcoming pipes for player
+ * to pick from
+ */
+const upcomingPipes = [...Array(6).keys()].map(() => {
+  return getRandomItemFromArray(Object.keys(pipes));
+});
+
+/*
+ * A list of directions and what directions they
+ * connec with. eg. South connects with north
+ */
+const directionConnectionMap: {
+  [key: string]: "n" | "e" | "s" | "w";
 } = {
   s: "n",
   n: "s",
@@ -50,101 +60,87 @@ const dirConnect: {
   w: "e",
 };
 
-let startRow = getRandomIntegerBetween(2, GRID_ROWS - 2);
-let startCol = getRandomIntegerBetween(2, GRID_COLS - 2);
-let endRow = startRow;
-let endCol = startCol;
+/*
+ * Create start and end pipes to place on grid
+ */
+const [startTile, endTile] = createInitialTiles({
+  start: [
+    [2, 1],
+    {
+      direction: "s",
+    },
+  ],
+  end: [[3, 3], { direction: "e" }],
+});
 
-let invalidEndPositions = [
-  `${startRow},${startCol}`,
-  `${startRow},${startCol + 1}`,
-  `${startRow},${startCol - 1}`,
-  `${startRow - 1},${startCol}`,
-  `${startRow - 1},${startCol + 1}`,
-  `${startRow - 1},${startCol - 1}`,
-  `${startRow + 1},${startCol}`,
-  `${startRow + 1},${startCol + 1}`,
-  `${startRow + 1},${startCol - 1}`,
-];
-
-while (invalidEndPositions.includes(`${endRow},${endCol}`)) {
-  endRow = getRandomIntegerBetween(2, GRID_ROWS - 2);
-  endCol = getRandomIntegerBetween(2, GRID_COLS - 2);
-}
-
-startRow = 2;
-startCol = 1;
-endRow = 2;
-endCol = 4;
-
-const startDirection = "s"; // getRandomItemFromArray(["s", "w", "n", "e"]);
-const endDirection = "w"; // getRandomItemFromArray(["s", "w", "n", "e"]);
-
-type tile = {
-  pipe: string;
-  direction?: string;
-};
-
-type tileWithPosition = tile & {
-  position: [number, number];
-  direction: string;
-};
-
-const startTile: [string, tile] = [
-  `${startRow},${startCol}`,
-  { pipe: "start", direction: startDirection },
-];
-
-const endTile: [string, tile] = [
-  `${endRow},${endCol}`,
-  { pipe: "end", direction: endDirection },
-];
-
-const grid = new Map<string, tile>([
-  ["2,2", { pipe: "h" }],
-  ["2,3", { pipe: "h" }],
-
-  ["2,1", { pipe: "v" }],
-  ["3,1", { pipe: "v" }],
-  ["4,1", { pipe: "ne" }],
-  ["4,2", { pipe: "nw" }],
-  ["3,2", { pipe: "v" }],
-  ["2,2", { pipe: "se" }],
-  ["2,3", { pipe: "h" }],
-  ["2,4", { pipe: "nw" }],
-  ["1,4", { pipe: "sw" }],
-  ["1,3", { pipe: "h" }],
-  ["1,2", { pipe: "ne" }],
-  ["0,2", { pipe: "se" }],
-  ["0,3", { pipe: "h" }],
-  ["0,4", { pipe: "h" }],
-  ["0,5", { pipe: "sw" }],
-  ["1,5", { pipe: "v" }],
-  ["2,5", { pipe: "v" }],
-  ["3,5", { pipe: "nw" }],
-  ["3,4", { pipe: "h" }],
+/*
+ * Setup initial tiles
+ */
+const tiles = new Grid([
+  startTile,
+  [[2, 3], { pipe: "h" }],
+  [[3, 1], { pipe: "v" }],
+  [[4, 1], { pipe: "ne" }],
+  [[4, 2], { pipe: "nw" }],
+  [[3, 2], { pipe: "v" }],
+  [[2, 2], { pipe: "se" }],
+  [[2, 3], { pipe: "h" }],
+  [[2, 4], { pipe: "nw" }],
+  [[1, 4], { pipe: "sw" }],
+  [[1, 3], { pipe: "h" }],
+  [[1, 2], { pipe: "ne" }],
+  [[0, 2], { pipe: "se" }],
+  [[0, 3], { pipe: "h" }],
+  [[0, 4], { pipe: "h" }],
+  [[0, 5], { pipe: "sw" }],
+  [[1, 5], { pipe: "v" }],
+  [[2, 5], { pipe: "v" }],
+  [[3, 5], { pipe: "nw" }],
+  [[3, 4], { pipe: "h" }],
+  endTile,
 ]);
 
-grid.set(...startTile);
-grid.set(...endTile);
+tiles.visit(startTile[0]);
 
-const visitedTiles: tileWithPosition[] = [
-  {
-    position: [startRow, startCol],
-    direction: startDirection,
-    ...startTile[1],
-  },
-];
-
-var i = 0;
-let nextTilePosition: string | undefined;
 let win = false;
+let gameOver = false;
 
-function next(): boolean {
-  i++;
+/*
+ * Retrieves the last visited pipe and checks wether it can connect
+ * to another pipe. If yes, the game continues until the "end pipe" is reached
+ * in which case the player wins. If no connection can be made, the game is over
+ * and the player loses
+ *
+ * If a connecting tile exists, the positing of that tile is returned
+ */
+function next() {
+  let tile = tiles.getLastVisitedTile();
+
+  if (tile) {
+    // Check if there is a tile that connects
+    let connectingTile = getConnectingTile(tile, tiles);
+
+    if (connectingTile) {
+      // Winning condition
+      if (connectingTile[1].pipe === "end") {
+        gameOver = true;
+        win = true;
+      } else {
+        // Update connecting tile with a new direction
+        tiles.set([connectingTile[0][0], connectingTile[0][1]], {
+          ...connectingTile[1],
+        });
+        tiles.visit(connectingTile[0]);
+        return connectingTile[0];
+      }
+    } else {
+      gameOver = true;
+    }
+  }
 
   if (gameOver) {
     window.clearInterval(gameLoop);
+
     if (gridEl !== null) {
       gridEl.className = "game-over";
     }
@@ -153,107 +149,92 @@ function next(): boolean {
       if (countdownEl !== null) {
         countdownEl.innerHTML = "GOOD JOB - <button>Restart</button>";
       }
-
-      let endTile = visitedTiles[visitedTiles.length - 1];
-      if (endTile) {
-        renderNextTile(`${endTile.position[0]},${endTile.position[1]}`);
-      }
     } else {
       console.log("__ LOSER ___");
       if (countdownEl !== null) {
         countdownEl.innerHTML = "GAME OVER - <button>Try Again</button>";
       }
     }
-    return false;
   }
-
-  let nextTile = visitedTiles[visitedTiles.length - 1];
-
-  if (typeof nextTile !== "undefined") {
-    nextTilePosition = nextTile.position.join(",");
-    let inGrid = grid.get(`${nextTile.position[0]},${nextTile.position[1]}`);
-
-    if (typeof inGrid !== "undefined") {
-      grid.set(`${nextTile.position[0]},${nextTile.position[1]}`, {
-        ...inGrid,
-        direction: nextTile.direction,
-      });
-    }
-
-    let connectingTile = getConnectingTile(nextTile, grid);
-
-    console.log(connectingTile);
-
-    if (connectingTile) {
-      if (connectingTile.pipe === "end") {
-        gameOver = true;
-        win = true;
-      }
-
-      visitedTiles.push(connectingTile);
-    }
-  }
-
-  return true;
 }
 
-function getConnectingTile(
-  from: tileWithPosition,
-  grid: Map<string, { pipe: string }>
-): tileWithPosition | void {
-  let position = from.position;
-  if (from.direction === "s") {
+function getConnectingTile(tile: Tile, tiles: Grid): Tile | void {
+  let position = tile[0];
+  let direction = tile[1].direction;
+
+  // Shift position based on direction
+  if (direction === "s") {
     position[0] = position[0] + 1;
-  } else if (from.direction === "n") {
+  } else if (direction === "n") {
     position[0] = position[0] - 1;
-  } else if (from.direction === "e") {
+  } else if (direction === "e") {
     position[1] = position[1] + 1;
-  } else if (from.direction === "w") {
+  } else if (direction === "w") {
     position[1] = position[1] - 1;
+  } else if (!direction) {
+    throw new Error("No direction on visited tile found");
   }
 
-  const next = grid.get(`${position[0]},${position[1]}`);
+  // Attempt to retrieve tile in shifted position
+  const nextTile = tiles.get([position[0], position[1]]);
 
-  if (next) {
-    let c = dirConnect[from.direction];
-    let b = connectsWith[next.pipe];
+  // if next tile exists, check wether it connects with the
+  // current tile direciton
+  if (nextTile) {
+    let directionConnection = directionConnectionMap[direction];
+    if (!directionConnection) {
+      throw new Error(direction + " direction has no connection");
+    }
 
-    if (next.pipe === "end") {
-      if (c === endDirection) {
-        return {
-          position: [position[0], position[1]],
-          direction: endDirection,
-          pipe: "end",
-        };
+    // If next pipe is end, check if it connects, if yes, return it.
+    if (nextTile.pipe === "end") {
+      if (directionConnection === nextTile.direction) {
+        return [[position[0], position[1]], nextTile];
       }
     }
 
-    if (typeof c === "undefined") {
-      throw new Error(
-        JSON.stringify(from.direction) + " doesnt connect with anything"
-      );
+    let pipeConnection = pipes[nextTile.pipe];
+    if (!pipeConnection) {
+      throw new Error(nextTile.pipe + " pipe has no connection");
     }
 
-    let a = [c];
+    // Check if directionConnection and a pipeConnection intersects, eg. connects.
+    if (intersect([directionConnection], pipeConnection).length === 1) {
+      // Extract the non-intersecting direction to set the
+      // directional flow of the next pipe
+      let newDirection: "n" | "s" | "w" | "e" | undefined = diff(
+        [directionConnection],
+        pipeConnection
+      )[0];
 
-    if (typeof b === "undefined") {
-      throw new Error(JSON.stringify(next) + " doesnt connect with anything");
-    }
-
-    if (intersect(a, b).length === 1) {
-      let direction = diff(a, b)[0];
-
-      if (typeof direction === "undefined") {
-        throw new Error("no direction found");
+      if (!newDirection) {
+        throw new Error("A direction for next tile could not be found");
       }
 
-      return {
-        position: [position[0], position[1]],
-        direction,
-        pipe: next.pipe,
-      };
+      return [
+        [position[0], position[1]],
+        {
+          direction: newDirection,
+          pipe: nextTile.pipe,
+        },
+      ];
     }
   }
+}
+
+// Game loop!
+let gameLoop: number;
+function panic() {
+  renderNextTile(startTile[0]);
+  gameLoop = window.setInterval(function () {
+    let nextTilePosition = next();
+    if (nextTilePosition) {
+      renderNextTile(nextTilePosition);
+    }
+    if (gameOver && win) {
+      renderNextTile(endTile[0]);
+    }
+  }, 1000);
 }
 
 const gridEl = document.querySelector<HTMLDivElement>("#grid");
@@ -277,11 +258,9 @@ if (countdownEl === null) {
   throw new Error("Cannot find <div id='countdown'>");
 }
 
-gridEl.innerHTML = renderGrid(grid, nextTilePosition);
+gridEl.innerHTML = renderGrid(tiles);
 upcomingEl.innerHTML = renderUpcomingPipes(upcomingPipes);
-
 gridEl.className = "game-in-progress";
-
 gridEl.addEventListener("click", function (event) {
   if (gameOver) {
     return;
@@ -291,18 +270,18 @@ gridEl.addEventListener("click", function (event) {
     const tile = target.closest(".tile");
     if (tile instanceof HTMLElement) {
       let nextPipe = upcomingPipes.pop();
-      upcomingPipes.unshift(getRandomItemFromArray(AVAILABLE_PIPES));
+      upcomingPipes.unshift(getRandomItemFromArray(Object.keys(pipes)));
       if (!nextPipe) {
         throw new Error("no next pipe available");
       }
       const row = parseFloat(tile.dataset.row || "");
       const col = parseFloat(tile.dataset.col || "");
-      let existingTile = grid.get(`${row},${col}`);
+      let existingTile = tiles.get([row, col]);
       // Don't allow replacing tiles that have been visited
       if (existingTile && existingTile.direction) {
         return;
       }
-      grid.set(`${row},${col}`, { pipe: nextPipe });
+      tiles.set([row, col], { pipe: nextPipe });
       tile.outerHTML = renderPipe({ pipe: nextPipe }, row, col, false);
       upcomingEl.innerHTML = renderUpcomingPipes(upcomingPipes);
     }
@@ -311,39 +290,21 @@ gridEl.addEventListener("click", function (event) {
 
 document.documentElement.style.setProperty("--num-cols", `${GRID_COLS}`);
 
-// Game loop!
-
-let gameLoop: number;
-
-function renderNextTile(nextTilePosition: string) {
-  let [row, col] = nextTilePosition.split(",");
+// Animate individual tile
+function renderNextTile(nextTilePosition: [number, number]) {
+  let [row, col] = nextTilePosition;
   let tile = document.querySelector(
     `div[data-row="${row}"][data-col="${col}"]`
   );
-  let inGrid = grid.get(`${row},${col}`);
-
+  let inGrid = tiles.get([row, col]);
   if (tile !== null && inGrid) {
-    tile.outerHTML = renderPipe(
-      { ...inGrid },
-      parseFloat(row || ""),
-      parseFloat(col || ""),
-      true
-    );
+    tile.outerHTML = renderPipe({ ...inGrid }, row, col, true);
   }
-}
-
-function panic() {
-  gameLoop = window.setInterval(function () {
-    if (next() && nextTilePosition) {
-      renderNextTile(nextTilePosition);
-    }
-  }, 1000);
 }
 
 // Countdown
 const COUNTDOWN = 3;
 let timer = COUNTDOWN;
-
 timeEl.innerHTML = timer.toString();
 let countdownLoop = window.setInterval(function () {
   timer--;

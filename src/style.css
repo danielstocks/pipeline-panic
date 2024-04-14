@@ -82,6 +82,7 @@ body {
   animation: dash 500ms linear forwards;
 }
 
+/* Start tile */
 .start-tile.w .svg {
   transform-box: fill-box;
   transform-origin: center;
@@ -98,6 +99,7 @@ body {
   transform: rotate(180deg);
 }
 
+/* End tile */
 .end-tile.w .svg {
   transform-box: fill-box;
   transform-origin: center;
@@ -108,7 +110,7 @@ body {
   transform-origin: center;
   transform: rotate(90deg);
 }
-.end-tile.n .svg {
+.end-tile.s .svg {
   transform-box: fill-box;
   transform-origin: center;
   transform: rotate(180deg);
