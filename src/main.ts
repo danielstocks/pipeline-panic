@@ -8,7 +8,7 @@
 // Bug: prevent double click to select text in tiles
 // Resume/pause game on tab focus/blur
 // Programatically create SVG instead of declaritevly
-// Improve overall rendering logic
+// Improve overall rendering/state management logic
 // Graphic/UI/Story enhhancement
 // Release 0.1
 
@@ -68,47 +68,25 @@ function tick() {
   }
 
   if (end) {
-    if (gridEl !== null) {
-      gridEl.className = "game-over";
-    }
+    gridEl.className = "game-over";
     window.clearInterval(gameLoop);
   }
   if (end && win) {
     // Render end tile if player wins
     renderNextTile(grid.endTile);
     console.log("__ WINNER ___");
-    if (countdownEl !== null) {
-      countdownEl.innerHTML = "GOOD JOB - <button>Restart</button>";
-    }
+    countdownEl.innerHTML = "GOOD JOB - <button>Restart</button>";
   }
   if (end && !win) {
     console.log("__ LOSER ___");
-    if (countdownEl !== null) {
-      countdownEl.innerHTML = "GAME OVER - <button>Try Again</button>";
-    }
+    countdownEl.innerHTML = "GAME OVER - <button>Try Again</button>";
   }
 }
 
-const gridEl = document.querySelector<HTMLDivElement>("#grid");
-const upcomingEl = document.querySelector<HTMLDivElement>("#upcoming-pipes");
-const timeEl = document.querySelector<HTMLSpanElement>("#time");
-const countdownEl = document.querySelector<HTMLDivElement>("#countdown");
-
-if (gridEl === null) {
-  throw new Error("Cannot find <div id='grid'>");
-}
-
-if (upcomingEl === null) {
-  throw new Error("Cannot find <div id='upcoming-pipes'>");
-}
-
-if (timeEl === null) {
-  throw new Error("Cannot find <span id='time'>");
-}
-
-if (countdownEl === null) {
-  throw new Error("Cannot find <div id='countdown'>");
-}
+const gridEl = document.querySelector<HTMLDivElement>("#grid")!;
+const upcomingEl = document.querySelector<HTMLDivElement>("#upcoming-pipes")!;
+const timeEl = document.querySelector<HTMLSpanElement>("#time")!;
+const countdownEl = document.querySelector<HTMLDivElement>("#countdown")!;
 
 gridEl.innerHTML = renderGrid(grid);
 upcomingEl.innerHTML = renderUpcomingPipes(upcomingPipes);
