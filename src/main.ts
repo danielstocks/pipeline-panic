@@ -15,31 +15,9 @@
 import "./style.css";
 import { renderGrid, renderPipe, renderUpcomingPipes } from "./render";
 import { GRID_COLS } from "./config";
-import { getRandomItemFromArray, intersect, diff } from "./util";
-import { Grid, Tile } from "./grid";
+import { getRandomItemFromArray } from "./util";
+import { Grid, Tile, pipes } from "./grid";
 import { fixtureStart, fixtureEnd, fixtureTiles } from "./fixture";
-
-/*
- * A map of available pipes and which directions
- * they can connect with
- *
- * h = horizontal
- * v = vertical
- * c = cross
- * ne = north-east
- * ...
- */
-const pipes: {
-  [key: string]: ("n" | "e" | "s" | "w")[];
-} = {
-  c: ["n", "e", "s", "w"],
-  ne: ["n", "e"],
-  nw: ["n", "w"],
-  sw: ["s", "w"],
-  se: ["s", "e"],
-  h: ["e", "w"],
-  v: ["n", "s"],
-};
 
 /*
  * Creates a list of upcoming pipes for player
@@ -50,89 +28,9 @@ const upcomingPipes = [...Array(6).keys()].map(() => {
 });
 
 /*
- * A list of directions and what directions they
- * connec with. eg. South connects with north
- */
-const directionConnectionMap: {
-  [key: string]: "n" | "e" | "s" | "w";
-} = {
-  s: "n",
-  n: "s",
-  e: "w",
-  w: "e",
-};
-
-/*
  * Create start and end tiles to place on grid
  */
-
-// TODO REFACTOR: accept start, end and tiles as arguments?
-// Automitcally "visit" start tile and make it required
 const grid = new Grid(fixtureStart, fixtureEnd, fixtureTiles);
-
-/*
- * Takes one tile and see if it connects with another tile on the grid
- */
-function getConnectingTile(tile: Tile, grid: Grid): Tile | void {
-  let position = tile[0];
-  let direction = tile[1].direction;
-
-  // Shift position based on direction
-  if (direction === "s") {
-    position[0] = position[0] + 1;
-  } else if (direction === "n") {
-    position[0] = position[0] - 1;
-  } else if (direction === "e") {
-    position[1] = position[1] + 1;
-  } else if (direction === "w") {
-    position[1] = position[1] - 1;
-  } else if (!direction) {
-    throw new Error("No direction on visited tile found");
-  }
-
-  // Attempt to retrieve tile in shifted position
-  const nextTile = grid.get([position[0], position[1]]);
-
-  // if next tile exists, check wether it connects with the
-  // current tile direciton
-  if (nextTile) {
-    let directionConnection = directionConnectionMap[direction];
-    if (!directionConnection) {
-      // TODO: if end pipe is reached here it will throw an error if it doenst connect
-      throw new Error(direction + " direction has no connection");
-    }
-
-    // If next pipe is end, check if it connects, if yes, return it.
-    if (nextTile.pipe === "end") {
-      if (directionConnection === nextTile.direction) {
-        return [[position[0], position[1]], nextTile];
-      }
-    }
-
-    let pipeConnection = pipes[nextTile.pipe];
-    if (!pipeConnection) {
-      throw new Error(nextTile.pipe + " pipe has no connection");
-    }
-
-    // Check if directionConnection and a pipeConnection intersects, eg. connects.
-    if (intersect([directionConnection], pipeConnection).length === 1) {
-      // Extract the non-intersecting direction to set the
-      // directional flow of the next pipe
-      let newDirection = diff([directionConnection], pipeConnection)[0];
-      if (!newDirection) {
-        throw new Error("A direction for next tile could not be found");
-      }
-
-      return [
-        [position[0], position[1]],
-        {
-          direction: newDirection,
-          pipe: nextTile.pipe,
-        },
-      ];
-    }
-  }
-}
 
 // Start the panic!
 let gameLoop: number;
@@ -145,7 +43,7 @@ function panic() {
 function tick() {
   let win = false;
   let end = false;
-  let nextTile = getConnectingTile(grid.getLastVisitedTile(), grid);
+  let nextTile = grid.getConnectingTile(grid.getLastVisitedTile());
 
   if (nextTile) {
     // Update connecting tile with a new direction
@@ -246,6 +144,7 @@ gridEl.addEventListener("click", function (event) {
   }
 });
 
+// Set global CSS variable to adjust layout to number of grid cols
 document.documentElement.style.setProperty("--num-cols", `${GRID_COLS}`);
 
 // Animate individual tile

@@ -1,4 +1,5 @@
 import { SetupTile, createInitialTiles } from "./create-initial-tiles";
+import { intersect, diff } from "./util";
 
 type position = [row: number, col: number];
 
@@ -7,6 +8,41 @@ export type Tile = [position, TileEntry];
 export type TileEntry = {
   pipe: string;
   direction?: "n" | "s" | "w" | "e" | undefined;
+};
+
+/*
+ * A map of available pipes and which directions
+ * they can connect with
+ *
+ * h = horizontal
+ * v = vertical
+ * c = cross
+ * ne = north-east
+ * ...
+ */
+export const pipes: {
+  [key: string]: ("n" | "e" | "s" | "w")[];
+} = {
+  c: ["n", "e", "s", "w"],
+  ne: ["n", "e"],
+  nw: ["n", "w"],
+  sw: ["s", "w"],
+  se: ["s", "e"],
+  h: ["e", "w"],
+  v: ["n", "s"],
+};
+
+/*
+ * A list of directions and what directions they
+ * connec with. eg. South connects with north
+ */
+const directionConnectionMap: {
+  [key: string]: "n" | "e" | "s" | "w";
+} = {
+  s: "n",
+  n: "s",
+  e: "w",
+  w: "e",
 };
 
 /*
@@ -68,5 +104,69 @@ export class Grid {
       }
     }
     throw new Error("No last visited tile found");
+  }
+
+  /*
+   * Takes one tile and see if it connects with another tile on the grid
+   */
+  getConnectingTile(tile: Tile): Tile | void {
+    let position = tile[0];
+    let direction = tile[1].direction;
+
+    // Shift position based on direction
+    if (direction === "s") {
+      position[0] = position[0] + 1;
+    } else if (direction === "n") {
+      position[0] = position[0] - 1;
+    } else if (direction === "e") {
+      position[1] = position[1] + 1;
+    } else if (direction === "w") {
+      position[1] = position[1] - 1;
+    } else if (!direction) {
+      throw new Error("No direction on visited tile found");
+    }
+
+    // Attempt to retrieve tile in shifted position
+    const nextTile = this.get([position[0], position[1]]);
+
+    // if next tile exists, check wether it connects with the
+    // current tile direciton
+    if (nextTile) {
+      let directionConnection = directionConnectionMap[direction];
+      if (!directionConnection) {
+        // TODO: if end pipe is reached here it will throw an error if it doenst connect
+        throw new Error(direction + " direction has no connection");
+      }
+
+      // If next pipe is end, check if it connects, if yes, return it.
+      if (nextTile.pipe === "end") {
+        if (directionConnection === nextTile.direction) {
+          return [[position[0], position[1]], nextTile];
+        }
+      }
+
+      let pipeConnection = pipes[nextTile.pipe];
+      if (!pipeConnection) {
+        throw new Error(nextTile.pipe + " pipe has no connection");
+      }
+
+      // Check if directionConnection and a pipeConnection intersects, eg. connects.
+      if (intersect([directionConnection], pipeConnection).length === 1) {
+        // Extract the non-intersecting direction to set the
+        // directional flow of the next pipe
+        let newDirection = diff([directionConnection], pipeConnection)[0];
+        if (!newDirection) {
+          throw new Error("A direction for next tile could not be found");
+        }
+
+        return [
+          [position[0], position[1]],
+          {
+            direction: newDirection,
+            pipe: nextTile.pipe,
+          },
+        ];
+      }
+    }
   }
 }
