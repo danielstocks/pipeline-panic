@@ -60,7 +60,7 @@ export class Grid {
   startTile: Tile;
   endTile: Tile;
 
-  constructor(start: SetupTile, end: SetupTile, tiles: Tile[]) {
+  constructor(start?: SetupTile, end?: SetupTile, tiles: Tile[] = []) {
     this.tileMap = new Map();
     const [startTile, endTile] = createInitialTiles({
       start,
@@ -109,9 +109,8 @@ export class Grid {
   /*
    * Takes one tile and see if it connects with another tile on the grid
    */
-  getConnectingTile(tile: Tile): Tile | void {
-    let position = tile[0];
-    let direction = tile[1].direction;
+  getConnectingTile(): Tile | void {
+    let [position, { direction }] = this.getLastVisitedTile();
 
     // Shift position based on direction
     if (direction === "s") {

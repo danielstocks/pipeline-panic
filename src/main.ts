@@ -14,10 +14,10 @@
 
 import "./style.css";
 import { renderGrid, renderPipe, renderUpcomingPipes } from "./render";
-import { GRID_COLS } from "./config";
+import { GRID_COLS, TIME_BEFORE_START } from "./config";
 import { getRandomItemFromArray } from "./util";
 import { Grid, Tile, pipes } from "./grid";
-import { fixtureStart, fixtureEnd, fixtureTiles } from "./fixture";
+// import { fixtureStart, fixtureEnd, fixtureTiles } from "./fixture";
 
 /*
  * Creates a list of upcoming pipes for player
@@ -30,7 +30,8 @@ const upcomingPipes = [...Array(6).keys()].map(() => {
 /*
  * Create start and end tiles to place on grid
  */
-const grid = new Grid(fixtureStart, fixtureEnd, fixtureTiles);
+//const grid = new Grid(fixtureStart, fixtureEnd, fixtureTiles);
+const grid = new Grid();
 
 // Start the panic!
 let gameLoop: number;
@@ -43,7 +44,7 @@ function panic() {
 function tick() {
   let win = false;
   let end = false;
-  let nextTile = grid.getConnectingTile(grid.getLastVisitedTile());
+  let nextTile = grid.getConnectingTile();
 
   if (nextTile) {
     // Update connecting tile with a new direction
@@ -160,8 +161,7 @@ function renderNextTile(tile: Tile) {
 }
 
 // Countdown
-const COUNTDOWN = 3;
-let timer = COUNTDOWN;
+let timer = TIME_BEFORE_START;
 timeEl.innerHTML = timer.toString();
 let countdownLoop = window.setInterval(function () {
   timer--;
