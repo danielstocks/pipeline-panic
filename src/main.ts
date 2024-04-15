@@ -1,8 +1,8 @@
 // * 0.1 release BACKLOG *
 //------------------------
 // Major refactor
-// Tesing + Test Coverage?
 // Reset game button
+// Tesing + Test Coverage?
 // Score system + High Score
 // Intersection pipes
 // Bug: prevent double click to select text in tiles
@@ -16,7 +16,7 @@ import "./style.css";
 import { renderGrid, renderPipe, renderUpcomingPipes } from "./render";
 import { GRID_COLS, TIME_BEFORE_START } from "./config";
 import { getRandomItemFromArray } from "./util";
-import { Grid, Tile, pipes } from "./grid";
+import { Grid, Tile, pipes, position } from "./grid";
 // import { fixtureStart, fixtureEnd, fixtureTiles } from "./fixture";
 
 /*
@@ -33,17 +33,19 @@ const upcomingPipes = [...Array(6).keys()].map(() => {
 //const grid = new Grid(fixtureStart, fixtureEnd, fixtureTiles);
 const grid = new Grid();
 
-// Start the panic!
+// Global state for the win
 let gameLoop: number;
+let win = false;
+let end = false;
+
+// Start the panic!
 function panic() {
   // Always render start tile when game starts
-  renderNextTile(grid.startTile);
+  animateTile(grid.startTile);
   gameLoop = window.setInterval(tick, 1000);
 }
 
 function tick() {
-  let win = false;
-  let end = false;
   let nextTile = grid.getConnectingTile();
 
   if (nextTile) {
@@ -53,8 +55,8 @@ function tick() {
     });
     grid.visit(nextTile[0]);
 
-    // Render next tile
-    renderNextTile(nextTile);
+    // Animate next tile
+    animateTile(nextTile);
 
     // Winning condition
     if (nextTile[1].pipe === "end") {
@@ -72,8 +74,8 @@ function tick() {
     window.clearInterval(gameLoop);
   }
   if (end && win) {
-    // Render end tile if player wins
-    renderNextTile(grid.endTile);
+    // Animate end tile
+    animateTile(grid.endTile);
     console.log("__ WINNER ___");
     countdownEl.innerHTML = "GOOD JOB - <button>Restart</button>";
   }
@@ -92,33 +94,17 @@ gridEl.innerHTML = renderGrid(grid);
 upcomingEl.innerHTML = renderUpcomingPipes(upcomingPipes);
 gridEl.className = "game-in-progress";
 
-// TODO REFACTOR: Seperate logic of adding tile from event handler
 gridEl.addEventListener("click", function (event) {
-  // TODO: how to do this?
-  /*
-  if (gameOver) {
+  if (end) {
     return;
   }
-  */
   const target = event.target;
   if (target instanceof HTMLElement || target instanceof SVGElement) {
     const tile = target.closest(".tile");
     if (tile instanceof HTMLElement) {
-      let nextPipe = upcomingPipes.pop();
-      upcomingPipes.unshift(getRandomItemFromArray(Object.keys(pipes)));
-      if (!nextPipe) {
-        throw new Error("no next pipe available");
-      }
       const row = parseFloat(tile.dataset.row || "");
       const col = parseFloat(tile.dataset.col || "");
-      let existingTile = grid.get([row, col]);
-      // Don't allow replacing tiles that have been visited
-      if (existingTile && existingTile.direction) {
-        return;
-      }
-      grid.set([row, col], { pipe: nextPipe });
-      tile.outerHTML = renderPipe({ pipe: nextPipe }, row, col, false);
-      upcomingEl.innerHTML = renderUpcomingPipes(upcomingPipes);
+      addPipeToGrid([row, col]);
     }
   }
 });
@@ -126,14 +112,38 @@ gridEl.addEventListener("click", function (event) {
 // Set global CSS variable to adjust layout to number of grid cols
 document.documentElement.style.setProperty("--num-cols", `${GRID_COLS}`);
 
+/*
+ * Add a new pipe to tile at given position
+ */
+function addPipeToGrid([row, col]: position) {
+  let nextPipe = upcomingPipes.pop();
+  upcomingPipes.unshift(getRandomItemFromArray(Object.keys(pipes)));
+  if (!nextPipe) {
+    throw new Error("no next pipe available");
+  }
+  // Check if tile already exists (eg. has a direction)
+  let existingTile = grid.get([row, col]);
+  // Don't allow replacing tiles that have been visited
+  if (existingTile?.direction) {
+    return;
+  }
+  grid.set([row, col], { pipe: nextPipe });
+  let tileEl = document.querySelector(
+    `div[data-row="${row}"][data-col="${col}"]`
+  );
+  if (tileEl !== null) {
+    tileEl.outerHTML = renderPipe({ pipe: nextPipe }, row, col, false);
+  }
+  upcomingEl.innerHTML = renderUpcomingPipes(upcomingPipes);
+}
+
 // Animate individual tile
-function renderNextTile(tile: Tile) {
+function animateTile(tile: Tile) {
   let [row, col] = tile[0];
   let tileEl = document.querySelector(
     `div[data-row="${row}"][data-col="${col}"]`
   );
-  let inGrid = grid.get([row, col]);
-  if (tileEl !== null && inGrid) {
+  if (tileEl !== null) {
     tileEl.outerHTML = renderPipe(tile[1], row, col, true);
   }
 }
