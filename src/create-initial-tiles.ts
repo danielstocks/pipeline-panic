@@ -3,7 +3,7 @@ import { getRandomIntegerBetween, getRandomItemFromArray } from "./util";
 
 const directions = ["n", "e", "s", "w"] as const;
 
-type SetupTile = [
+export type SetupTile = [
   [number, number],
   {
     direction: (typeof directions)[number];
@@ -21,18 +21,18 @@ export function createInitialTiles({
   start,
   end,
 }: {
-  start: SetupTile;
-  end: SetupTile;
-}): [Tile, Tile] {
-  let startRow = start[0][0] || getRandomIntegerBetween(2, GRID_ROWS - 2);
-  let startCol = start[0][1] || getRandomIntegerBetween(2, GRID_COLS - 2);
-  let endRow = end[0][0] || startRow;
-  let endCol = end[0][1] || startCol;
+  start?: SetupTile;
+  end?: SetupTile;
+} = {}): [Tile, Tile] {
+  let startRow = start?.[0][0] || getRandomIntegerBetween(2, GRID_ROWS - 2);
+  let startCol = start?.[0][1] || getRandomIntegerBetween(2, GRID_COLS - 2);
+  let endRow = end?.[0][0] || startRow;
+  let endCol = end?.[0][1] || startCol;
 
   const startDirection =
-    start[1].direction || getRandomItemFromArray([...directions]);
+    start?.[1].direction || getRandomItemFromArray([...directions]);
   const endDirection =
-    end[1].direction || getRandomItemFromArray([...directions]);
+    end?.[1].direction || getRandomItemFromArray([...directions]);
 
   let invalidEndPositions = [
     `${startRow},${startCol}`,

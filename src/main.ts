@@ -1,14 +1,15 @@
 // * 0.1 release BACKLOG *
 //------------------------
-// TODO: Major refactor
-// TODO: Reset game button
-// TODO  Intersection pipes
-// TODO: Score
-// TODO: Resume/pause game on tab focus/blur
-// TODO: "How to test?"
-// TODO: Programatically create SVG instead of declaritevly
-// TODO: Graphic/UI/Story enhhancement
-// TODO: Release 0.1
+// Major refactor
+// Tesing + Test Coverage?
+// Reset game button
+// Intersection pipes
+// Score
+// TODO: prevent double click to select text in tiles
+// Resume/pause game on tab focus/blur
+// Programatically create SVG instead of declaritevly
+// Graphic/UI/Story enhhancement
+// Release 0.1
 
 import "./style.css";
 import { renderGrid, renderPipe, renderUpcomingPipes } from "./render";
@@ -16,6 +17,7 @@ import { GRID_COLS } from "./config";
 import { getRandomItemFromArray, intersect, diff } from "./util";
 import { createInitialTiles } from "./create-initial-tiles";
 import { Grid, Tile } from "./grid";
+import { fixture1, initialTileFixture } from "./fixture";
 
 /*
  * A map of available pipes and which directions
@@ -61,103 +63,18 @@ const directionConnectionMap: {
 };
 
 /*
- * Create start and end pipes to place on grid
+ * Create start and end tiles to place on grid
  */
-const [startTile, endTile] = createInitialTiles({
-  start: [
-    [2, 1],
-    {
-      direction: "s",
-    },
-  ],
-  end: [[3, 3], { direction: "e" }],
-});
+const [startTile, endTile] = createInitialTiles(initialTileFixture);
 
-/*
- * Setup initial tiles
- */
-const tiles = new Grid([
-  startTile,
-  [[2, 3], { pipe: "h" }],
-  [[3, 1], { pipe: "v" }],
-  [[4, 1], { pipe: "ne" }],
-  [[4, 2], { pipe: "nw" }],
-  [[3, 2], { pipe: "v" }],
-  [[2, 2], { pipe: "se" }],
-  [[2, 3], { pipe: "h" }],
-  [[2, 4], { pipe: "nw" }],
-  [[1, 4], { pipe: "sw" }],
-  [[1, 3], { pipe: "h" }],
-  [[1, 2], { pipe: "ne" }],
-  [[0, 2], { pipe: "se" }],
-  [[0, 3], { pipe: "h" }],
-  [[0, 4], { pipe: "h" }],
-  [[0, 5], { pipe: "sw" }],
-  [[1, 5], { pipe: "v" }],
-  [[2, 5], { pipe: "v" }],
-  [[3, 5], { pipe: "nw" }],
-  [[3, 4], { pipe: "h" }],
-  endTile,
-]);
-
+// TODO REFACTOR: accept start, end and tiles as arguments?
+// Automitcally "visit" start tile and make it required
+const tiles = new Grid([startTile, endTile, ...fixture1]);
 tiles.visit(startTile[0]);
 
-let win = false;
-let gameOver = false;
-
 /*
- * Retrieves the last visited pipe and checks wether it can connect
- * to another pipe. If yes, the game continues until the "end pipe" is reached
- * in which case the player wins. If no connection can be made, the game is over
- * and the player loses
- *
- * If a connecting tile exists, the positing of that tile is returned
+ * Takes one tile and see if it connects with another tile on the grid
  */
-function next() {
-  let tile = tiles.getLastVisitedTile();
-
-  if (tile) {
-    // Check if there is a tile that connects
-    let connectingTile = getConnectingTile(tile, tiles);
-
-    if (connectingTile) {
-      // Winning condition
-      if (connectingTile[1].pipe === "end") {
-        gameOver = true;
-        win = true;
-      } else {
-        // Update connecting tile with a new direction
-        tiles.set([connectingTile[0][0], connectingTile[0][1]], {
-          ...connectingTile[1],
-        });
-        tiles.visit(connectingTile[0]);
-        return connectingTile[0];
-      }
-    } else {
-      gameOver = true;
-    }
-  }
-
-  if (gameOver) {
-    window.clearInterval(gameLoop);
-
-    if (gridEl !== null) {
-      gridEl.className = "game-over";
-    }
-    if (win) {
-      console.log("__ WINNER ___");
-      if (countdownEl !== null) {
-        countdownEl.innerHTML = "GOOD JOB - <button>Restart</button>";
-      }
-    } else {
-      console.log("__ LOSER ___");
-      if (countdownEl !== null) {
-        countdownEl.innerHTML = "GAME OVER - <button>Try Again</button>";
-      }
-    }
-  }
-}
-
 function getConnectingTile(tile: Tile, tiles: Grid): Tile | void {
   let position = tile[0];
   let direction = tile[1].direction;
@@ -183,6 +100,7 @@ function getConnectingTile(tile: Tile, tiles: Grid): Tile | void {
   if (nextTile) {
     let directionConnection = directionConnectionMap[direction];
     if (!directionConnection) {
+      // TODO: if end pipe is reached here it will throw an error if it doenst connect
       throw new Error(direction + " direction has no connection");
     }
 
@@ -202,11 +120,7 @@ function getConnectingTile(tile: Tile, tiles: Grid): Tile | void {
     if (intersect([directionConnection], pipeConnection).length === 1) {
       // Extract the non-intersecting direction to set the
       // directional flow of the next pipe
-      let newDirection: "n" | "s" | "w" | "e" | undefined = diff(
-        [directionConnection],
-        pipeConnection
-      )[0];
-
+      let newDirection = diff([directionConnection], pipeConnection)[0];
       if (!newDirection) {
         throw new Error("A direction for next tile could not be found");
       }
@@ -222,19 +136,60 @@ function getConnectingTile(tile: Tile, tiles: Grid): Tile | void {
   }
 }
 
-// Game loop!
+// Start the panic!
 let gameLoop: number;
 function panic() {
+  // Always render start tile when game starts
   renderNextTile(startTile[0]);
-  gameLoop = window.setInterval(function () {
-    let nextTilePosition = next();
-    if (nextTilePosition) {
-      renderNextTile(nextTilePosition);
+  gameLoop = window.setInterval(tick, 1000);
+}
+
+function tick() {
+  let win = false;
+  let end = false;
+  let nextTile = getConnectingTile(tiles.getLastVisitedTile(), tiles);
+
+  if (nextTile) {
+    // Update connecting tile with a new direction
+    tiles.set([nextTile[0][0], nextTile[0][1]], {
+      ...nextTile[1],
+    });
+    tiles.visit(nextTile[0]);
+
+    // Render next tile
+    renderNextTile(nextTile[0]);
+
+    // Winning condition
+    if (nextTile[1].pipe === "end") {
+      end = true;
+      win = true;
     }
-    if (gameOver && win) {
-      renderNextTile(endTile[0]);
+  } else {
+    // Losing condition
+    end = true;
+    win = false;
+  }
+
+  if (end) {
+    if (gridEl !== null) {
+      gridEl.className = "game-over";
     }
-  }, 1000);
+    window.clearInterval(gameLoop);
+  }
+  if (end && win) {
+    // Render end tile if player wins
+    renderNextTile(endTile[0]);
+    console.log("__ WINNER ___");
+    if (countdownEl !== null) {
+      countdownEl.innerHTML = "GOOD JOB - <button>Restart</button>";
+    }
+  }
+  if (end && !win) {
+    console.log("__ LOSER ___");
+    if (countdownEl !== null) {
+      countdownEl.innerHTML = "GAME OVER - <button>Try Again</button>";
+    }
+  }
 }
 
 const gridEl = document.querySelector<HTMLDivElement>("#grid");
@@ -261,10 +216,15 @@ if (countdownEl === null) {
 gridEl.innerHTML = renderGrid(tiles);
 upcomingEl.innerHTML = renderUpcomingPipes(upcomingPipes);
 gridEl.className = "game-in-progress";
+
+// TODO REFACTOR: Seperate logic of adding tile from event handler
 gridEl.addEventListener("click", function (event) {
+  // TODO: how to do this?
+  /*
   if (gameOver) {
     return;
   }
+  */
   const target = event.target;
   if (target instanceof HTMLElement || target instanceof SVGElement) {
     const tile = target.closest(".tile");

@@ -9,6 +9,9 @@ export type TileEntry = {
  *  A wrapper around a Map() that stores row & col
  *  as a serialized string in order for easy read/write
  *  but allows access passing an array [row, col]
+ *
+ *  Also contains logic around what tiles
+ *  are visisted tiles.
  */
 export class Grid {
   private tileMap: Map<string, TileEntry>;
@@ -17,7 +20,6 @@ export class Grid {
   constructor(tiles: Tile[]) {
     this.tileMap = new Map();
     this.visited = [];
-
     for (let tile of tiles) {
       this.set(tile[0], tile[1]);
     }
@@ -35,12 +37,11 @@ export class Grid {
     return this.tileMap.get(`${key[0]},${key[1]}`);
   }
 
-  // Store the visited row, col
   visit([row, col]: [number, number]) {
     this.visited.push([row, col]);
   }
 
-  getLastVisitedTile(): Tile | void {
+  getLastVisitedTile(): Tile {
     let lastVisitedPosition = this.visited[this.visited.length - 1];
     if (lastVisitedPosition) {
       let lastVisitedTile = this.get(lastVisitedPosition);
@@ -48,5 +49,6 @@ export class Grid {
         return [lastVisitedPosition, lastVisitedTile];
       }
     }
+    throw new Error("No last visited tile found");
   }
 }
