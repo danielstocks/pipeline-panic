@@ -4,7 +4,7 @@ import { getRandomIntegerBetween, getRandomItemFromArray } from "./util";
 const directions = ["n", "e", "s", "w"] as const;
 
 export type SetupTile = [
-  [number, number],
+  [row: number, col: number],
   {
     direction: (typeof directions)[number];
   }

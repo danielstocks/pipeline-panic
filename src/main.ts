@@ -3,11 +3,12 @@
 // Major refactor
 // Tesing + Test Coverage?
 // Reset game button
+// Score system + High Score
 // Intersection pipes
-// Score
-// TODO: prevent double click to select text in tiles
+// Bug: prevent double click to select text in tiles
 // Resume/pause game on tab focus/blur
 // Programatically create SVG instead of declaritevly
+// Improve overall rendering logic
 // Graphic/UI/Story enhhancement
 // Release 0.1
 
@@ -15,9 +16,8 @@ import "./style.css";
 import { renderGrid, renderPipe, renderUpcomingPipes } from "./render";
 import { GRID_COLS } from "./config";
 import { getRandomItemFromArray, intersect, diff } from "./util";
-import { createInitialTiles } from "./create-initial-tiles";
 import { Grid, Tile } from "./grid";
-import { fixture1, initialTileFixture } from "./fixture";
+import { fixtureStart, fixtureEnd, fixtureTiles } from "./fixture";
 
 /*
  * A map of available pipes and which directions
@@ -65,17 +65,15 @@ const directionConnectionMap: {
 /*
  * Create start and end tiles to place on grid
  */
-const [startTile, endTile] = createInitialTiles(initialTileFixture);
 
 // TODO REFACTOR: accept start, end and tiles as arguments?
 // Automitcally "visit" start tile and make it required
-const tiles = new Grid([startTile, endTile, ...fixture1]);
-tiles.visit(startTile[0]);
+const grid = new Grid(fixtureStart, fixtureEnd, fixtureTiles);
 
 /*
  * Takes one tile and see if it connects with another tile on the grid
  */
-function getConnectingTile(tile: Tile, tiles: Grid): Tile | void {
+function getConnectingTile(tile: Tile, grid: Grid): Tile | void {
   let position = tile[0];
   let direction = tile[1].direction;
 
@@ -93,7 +91,7 @@ function getConnectingTile(tile: Tile, tiles: Grid): Tile | void {
   }
 
   // Attempt to retrieve tile in shifted position
-  const nextTile = tiles.get([position[0], position[1]]);
+  const nextTile = grid.get([position[0], position[1]]);
 
   // if next tile exists, check wether it connects with the
   // current tile direciton
@@ -140,24 +138,24 @@ function getConnectingTile(tile: Tile, tiles: Grid): Tile | void {
 let gameLoop: number;
 function panic() {
   // Always render start tile when game starts
-  renderNextTile(startTile[0]);
+  renderNextTile(grid.startTile);
   gameLoop = window.setInterval(tick, 1000);
 }
 
 function tick() {
   let win = false;
   let end = false;
-  let nextTile = getConnectingTile(tiles.getLastVisitedTile(), tiles);
+  let nextTile = getConnectingTile(grid.getLastVisitedTile(), grid);
 
   if (nextTile) {
     // Update connecting tile with a new direction
-    tiles.set([nextTile[0][0], nextTile[0][1]], {
+    grid.set([nextTile[0][0], nextTile[0][1]], {
       ...nextTile[1],
     });
-    tiles.visit(nextTile[0]);
+    grid.visit(nextTile[0]);
 
     // Render next tile
-    renderNextTile(nextTile[0]);
+    renderNextTile(nextTile);
 
     // Winning condition
     if (nextTile[1].pipe === "end") {
@@ -178,7 +176,7 @@ function tick() {
   }
   if (end && win) {
     // Render end tile if player wins
-    renderNextTile(endTile[0]);
+    renderNextTile(grid.endTile);
     console.log("__ WINNER ___");
     if (countdownEl !== null) {
       countdownEl.innerHTML = "GOOD JOB - <button>Restart</button>";
@@ -213,7 +211,7 @@ if (countdownEl === null) {
   throw new Error("Cannot find <div id='countdown'>");
 }
 
-gridEl.innerHTML = renderGrid(tiles);
+gridEl.innerHTML = renderGrid(grid);
 upcomingEl.innerHTML = renderUpcomingPipes(upcomingPipes);
 gridEl.className = "game-in-progress";
 
@@ -236,12 +234,12 @@ gridEl.addEventListener("click", function (event) {
       }
       const row = parseFloat(tile.dataset.row || "");
       const col = parseFloat(tile.dataset.col || "");
-      let existingTile = tiles.get([row, col]);
+      let existingTile = grid.get([row, col]);
       // Don't allow replacing tiles that have been visited
       if (existingTile && existingTile.direction) {
         return;
       }
-      tiles.set([row, col], { pipe: nextPipe });
+      grid.set([row, col], { pipe: nextPipe });
       tile.outerHTML = renderPipe({ pipe: nextPipe }, row, col, false);
       upcomingEl.innerHTML = renderUpcomingPipes(upcomingPipes);
     }
@@ -251,14 +249,14 @@ gridEl.addEventListener("click", function (event) {
 document.documentElement.style.setProperty("--num-cols", `${GRID_COLS}`);
 
 // Animate individual tile
-function renderNextTile(nextTilePosition: [number, number]) {
-  let [row, col] = nextTilePosition;
-  let tile = document.querySelector(
+function renderNextTile(tile: Tile) {
+  let [row, col] = tile[0];
+  let tileEl = document.querySelector(
     `div[data-row="${row}"][data-col="${col}"]`
   );
-  let inGrid = tiles.get([row, col]);
-  if (tile !== null && inGrid) {
-    tile.outerHTML = renderPipe({ ...inGrid }, row, col, true);
+  let inGrid = grid.get([row, col]);
+  if (tileEl !== null && inGrid) {
+    tileEl.outerHTML = renderPipe(tile[1], row, col, true);
   }
 }
 

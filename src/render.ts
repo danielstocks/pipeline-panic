@@ -30,13 +30,13 @@ function renderTile(
   }" data-row="${row}" data-col="${col}">${children}</div>`;
 }
 
-type tile = {
+type Tile = {
   pipe: string;
   direction?: string;
 };
 
 export function renderPipe(
-  tile: tile,
+  tile: Tile,
   row: number,
   col: number,
   animate: boolean

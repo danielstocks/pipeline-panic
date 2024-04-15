@@ -1,4 +1,8 @@
-export type Tile = [[number, number], TileEntry];
+import { SetupTile, createInitialTiles } from "./create-initial-tiles";
+
+type position = [row: number, col: number];
+
+export type Tile = [position, TileEntry];
 
 export type TileEntry = {
   pipe: string;
@@ -15,11 +19,25 @@ export type TileEntry = {
  */
 export class Grid {
   private tileMap: Map<string, TileEntry>;
-  visited: [number, number][];
+  visited: [row: number, col: number][];
 
-  constructor(tiles: Tile[]) {
+  startTile: Tile;
+  endTile: Tile;
+
+  constructor(start: SetupTile, end: SetupTile, tiles: Tile[]) {
     this.tileMap = new Map();
+    const [startTile, endTile] = createInitialTiles({
+      start,
+      end,
+    });
+
+    this.startTile = startTile;
+    this.endTile = endTile;
+    this.set(...startTile);
+    this.set(...endTile);
+
     this.visited = [];
+    this.visit(startTile[0]);
     for (let tile of tiles) {
       this.set(tile[0], tile[1]);
     }
@@ -29,15 +47,15 @@ export class Grid {
     return this.tileMap.entries();
   }
 
-  set(key: [number, number], tile: TileEntry) {
+  set(key: position, tile: TileEntry) {
     this.tileMap.set(`${key[0]},${key[1]}`, tile);
   }
 
-  get(key: [number, number]) {
+  get(key: position) {
     return this.tileMap.get(`${key[0]},${key[1]}`);
   }
 
-  visit([row, col]: [number, number]) {
+  visit([row, col]: position) {
     this.visited.push([row, col]);
   }
 
