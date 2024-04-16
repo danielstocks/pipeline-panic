@@ -1,8 +1,10 @@
 # Pipeline Panic
 
-| Save the world before the pink sludge consumes us all!
+![Screenshot 2024-04-16 at 10 46 47](https://github.com/danielstocks/pipeline-panic/assets/52788/6980cde7-6aa0-4b73-8bbe-555bed14936b)
 
-A modern browser based re-interpretation of the [Pipe Mania](https://en.wikipedia.org/wiki/Pipe_Mania) video game originally published in 1989. Built for educational purposes.
+> Save the world before the pink sludge consumes us all!
+
+Pipeline panic is a modern browser based re-interpretation of the [Pipe Mania](https://en.wikipedia.org/wiki/Pipe_Mania) video game originally published in 1989. Built for educational purposes.
 
 ## Game objective
 
