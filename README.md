@@ -1,6 +1,8 @@
 # Pipeline Panic
 
-Save the world before the pink sludge consumes us all!
+| Save the world before the pink sludge consumes us all!
+
+A modern browser based re-interpretation of the [Pipe Mania](https://en.wikipedia.org/wiki/Pipe_Mania) video game originally published in 1989. Built for educational purposes.
 
 ## Game objective
 
