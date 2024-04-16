@@ -8,7 +8,7 @@ Pipeline panic is a modern browser based re-interpretation of the [Pipe Mania](h
 
 ## Game objective
 
-Build a pipe that goes from start to end.
+Build a pipe that goes from start to end while earning Pipeline Dolares (¤)
 
 You will have 30 seconds to build your pipe before the panic starts.
 
@@ -18,11 +18,11 @@ If you have completed the pipe and the sludge reaches the end pipe the game is w
 
 ## How to earn
 
-To achieve a high score you need to finish from start to end and earn Pipeline Dolares (¤)!
-
 - You start with ¤50 in the bank
 - You earn ¤50 for every tile that gets filled with sludge
 - It costs ¤1 to place a tile
 - It costs ¤2 to replacing an existing tile
 
 Be careful! You can't go below ¤0, meaning you won't be able to replace or place new tiles if you run out of money.
+
+To achieve a high score you need to finish the pipe from start to end.
