@@ -11,9 +11,9 @@ import {
   renderPipe,
   renderUpcomingPipes,
 } from "./render";
-import { GRID_COLS, TIME_BEFORE_START } from "./config";
+import { GRID_COLS, GAME_SPEED, TIME_BEFORE_START } from "./config";
 import { Grid, position } from "./grid";
-// import { fixtureStart, fixtureEnd, fixtureTiles } from "./fixture";
+import { fixtureStart, fixtureEnd, fixtureTiles } from "./fixture";
 
 let highScore = 0;
 const upcomingEl = document.querySelector<HTMLDivElement>("#upcoming-pipes")!;
@@ -32,8 +32,8 @@ type Game = {
 };
 
 function init() {
-  //const grid = new Grid(fixtureStart, fixtureEnd, fixtureTiles);
-  const grid = new Grid();
+  const grid = new Grid(fixtureStart, fixtureEnd, fixtureTiles);
+  //const grid = new Grid();
 
   let game: Game = {
     win: false,
@@ -99,7 +99,7 @@ function panic(grid: Grid, game: Game) {
   animateTile(grid.startTile);
   game.loop = window.setInterval(() => {
     tick(grid, game);
-  }, 1000);
+  }, GAME_SPEED);
 }
 
 function tick(grid: Grid, game: Game) {

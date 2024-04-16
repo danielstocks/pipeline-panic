@@ -90,16 +90,16 @@ body {
   display: block;
   stroke-dasharray: 1000;
   stroke-dashoffset: 1000;
-  animation: dash 1000ms linear forwards;
+  animation: dash 2000ms linear forwards;
 }
 
 .fill-pipe-animate .start-tile .fill {
-  animation: dash 500ms linear forwards;
-  animation-delay: 500ms;
+  animation: dash 1000ms linear forwards;
+  animation-delay: 1000ms;
 }
 
 .fill-pipe-animate .end-tile .fill {
-  animation: dash 500ms linear forwards;
+  animation: dash 1000ms linear forwards;
 }
 
 /* Start tile */
