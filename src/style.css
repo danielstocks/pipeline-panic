@@ -7,6 +7,7 @@
   --num-cols: 4;
   --grid-border-color: #555;
   --main-color: #00b78b;
+  --main-color-shade: rgb(0, 122, 93);
 }
 body {
   margin: 0;
@@ -39,9 +40,12 @@ body {
 
 #score {
   margin-right: 20px;
+  font-size: 20px;
   border: 1px dashed var(--main-color);
   height: 38px;
-  line-height: 38px;
+  background-color: var(--main-color-shade);
+  font-weight: 400;
+  line-height: 40px;
   padding: 0 8px;
 }
 
@@ -53,13 +57,29 @@ body {
   padding: 0 8px;
 }
 
+#message span {
+  color: red;
+  animation: fade-out 0.5s 1;
+  animation-fill-mode: forwards;
+  animation-delay: 2s;
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 .fill {
   display: none;
 }
 
 #high {
-  font-size: 9px;
-  font-weight: 100;
+  font-size: 11px;
+  letter-spacing: 0px;
 }
 
 .fill-pipe .fill {

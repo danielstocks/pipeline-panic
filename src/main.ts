@@ -1,15 +1,8 @@
 // * 0.1 release BACKLOG *
 //------------------------
-// Reset game button
-// Tesing + Test Coverage?
-// Score system + High Score
 // Intersection pipes
-// Bug: prevent double click to select text in tiles
-// Resume/pause game on tab focus/blur
-// Programatically create SVG instead of declaritevly
-// Improve overall rendering/state management logic
-// Graphic/UI/Story enhhancement
-// Release 0.1
+// Animate insuffcient funds
+// Animate upcoming pipes
 
 import "./style.css";
 import {
@@ -22,10 +15,11 @@ import { GRID_COLS, TIME_BEFORE_START } from "./config";
 import { Grid, position } from "./grid";
 // import { fixtureStart, fixtureEnd, fixtureTiles } from "./fixture";
 
+let highScore = 0;
 const upcomingEl = document.querySelector<HTMLDivElement>("#upcoming-pipes")!;
 const gridEl = document.querySelector<HTMLDivElement>("#grid")!;
-const timeEl = document.querySelector<HTMLSpanElement>("#time")!;
 const countdownEl = document.querySelector<HTMLDivElement>("#countdown")!;
+const messageEl = document.querySelector<HTMLDivElement>("#message")!;
 
 // Set global CSS variable to adjust layout to number of grid cols
 document.documentElement.style.setProperty("--num-cols", `${GRID_COLS}`);
@@ -45,12 +39,15 @@ function init() {
     win: false,
     end: false,
     loop: 0,
-    score: 0,
+    score: 50,
   };
 
   gridEl.innerHTML = renderGrid(grid);
   upcomingEl.innerHTML = renderUpcomingPipes(grid.upcomingPipes);
   gridEl.className = "game-in-progress";
+  countdownEl.innerHTML = "PANIC IN: <span id='time'></span>";
+
+  renderScore(game.score);
 
   countdown(function () {
     panic(grid, game);
@@ -60,17 +57,28 @@ function init() {
     handleGridClick(event.target, game, grid);
   });
 
-  /*
   countdownEl.addEventListener("click", (event) => {
-    handle;
+    handleCountdownClick(event.target);
   });
-  */
+}
+
+function renderScore(score: number) {
+  const scoreEl = document.querySelector<HTMLDivElement>("#score")!;
+
+  scoreEl.innerHTML = `
+    <div id="current">¤${score}</div>
+  `;
+
+  if (highScore > 0) {
+    scoreEl.innerHTML += `<div id="high">High: ¤${highScore}</div>`;
+  }
 }
 
 init();
 
 function countdown(fn: () => void) {
   // Countdown
+  const timeEl = document.querySelector<HTMLSpanElement>("#time")!;
   let timer = TIME_BEFORE_START;
   timeEl.innerHTML = timer.toString();
   let countdownLoop = window.setInterval(function () {
@@ -107,6 +115,9 @@ function tick(grid: Grid, game: Game) {
     // Animate next tile
     animateTile(nextTile);
 
+    game.score += 50;
+    renderScore(game.score);
+
     // Winning condition
     if (nextTile[1].pipe === "end") {
       game.end = true;
@@ -124,12 +135,14 @@ function tick(grid: Grid, game: Game) {
   }
   if (game.end && game.win) {
     animateTile(grid.endTile);
-    console.log("__ WINNER ___");
-    countdownEl.innerHTML = "GOOD JOB - <button>Restart</button>";
+    highScore = game.score;
+    renderScore(game.score);
+    console.log("__ WE LIVE ANOTHER DAY ___");
+    countdownEl.innerHTML = "GOOD JOB - <button id='reset'>Restart</button>";
   }
   if (game.end && !game.win) {
-    console.log("__ LOSER ___");
-    countdownEl.innerHTML = "GAME OVER - <button>Try Again</button>";
+    console.log("__ END OF THE F***ING WORLD ___");
+    countdownEl.innerHTML = "GAME OVER - <button id='reset'>Try Again</button>";
   }
 }
 
@@ -141,12 +154,43 @@ function handleGridClick(target: EventTarget | null, game: Game, grid: Grid) {
   if (game.end) {
     return;
   }
+  if (game.score <= 0) {
+    messageEl.innerHTML = "<span>Insufficient funds</span>";
+    return;
+  }
   if (target instanceof HTMLElement || target instanceof SVGElement) {
     const tile = target.closest(".tile");
     if (tile instanceof HTMLElement) {
       const row = parseFloat(tile.dataset.row || "");
       const col = parseFloat(tile.dataset.col || "");
-      addPipeToGrid([row, col], grid);
+      let result = addPipeToGrid([row, col], grid, game.score);
+
+      if (result == "new") {
+        game.score -= 1;
+      }
+      if (result === "replacement") {
+        game.score -= 5;
+      }
+
+      messageEl.innerHTML = "";
+      if (result == "insufficient-funds") {
+        messageEl.innerHTML = "<span>Insufficient funds</span>";
+      }
+
+      renderScore(game.score);
+    }
+  }
+}
+
+/*
+ * Handle a click event on the grid and add a new
+ * pipe to the tile if possible
+ */
+function handleCountdownClick(target: EventTarget | null) {
+  if (target instanceof HTMLElement) {
+    const tile = target.closest("button");
+    if (tile instanceof HTMLButtonElement && tile.id == "reset") {
+      init();
     }
   }
 }
@@ -154,7 +198,11 @@ function handleGridClick(target: EventTarget | null, game: Game, grid: Grid) {
 /*
  * Add a new pipe to tile at given position
  */
-function addPipeToGrid([row, col]: position, grid: Grid) {
+function addPipeToGrid(
+  [row, col]: position,
+  grid: Grid,
+  score: number
+): ("new" | "replacement" | "insufficient-funds") | void {
   let nextPipe = grid.getUpcomingPipe();
 
   // Check if tile already exists (eg. has a direction)
@@ -163,7 +211,13 @@ function addPipeToGrid([row, col]: position, grid: Grid) {
   if (existingTile?.direction) {
     return;
   }
+
+  if (existingTile && score < 5) {
+    return "insufficient-funds";
+  }
+
   grid.set([row, col], { pipe: nextPipe });
+
   let tileEl = document.querySelector(
     `div[data-row="${row}"][data-col="${col}"]`
   );
@@ -171,4 +225,5 @@ function addPipeToGrid([row, col]: position, grid: Grid) {
     tileEl.outerHTML = renderPipe({ pipe: nextPipe }, row, col, false);
   }
   upcomingEl.innerHTML = renderUpcomingPipes(grid.upcomingPipes);
+  return existingTile ? "replacement" : "new";
 }
