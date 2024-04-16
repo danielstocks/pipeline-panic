@@ -1,6 +1,5 @@
 // * 0.1 release BACKLOG *
 //------------------------
-// Major refactor
 // Reset game button
 // Tesing + Test Coverage?
 // Score system + High Score
@@ -13,39 +12,89 @@
 // Release 0.1
 
 import "./style.css";
-import { renderGrid, renderPipe, renderUpcomingPipes } from "./render";
+import {
+  renderGrid,
+  animateTile,
+  renderPipe,
+  renderUpcomingPipes,
+} from "./render";
 import { GRID_COLS, TIME_BEFORE_START } from "./config";
-import { getRandomItemFromArray } from "./util";
-import { Grid, Tile, pipes, position } from "./grid";
+import { Grid, position } from "./grid";
 // import { fixtureStart, fixtureEnd, fixtureTiles } from "./fixture";
 
-/*
- * Creates a list of upcoming pipes for player
- * to pick from
- */
-const upcomingPipes = [...Array(6).keys()].map(() => {
-  return getRandomItemFromArray(Object.keys(pipes));
-});
+const upcomingEl = document.querySelector<HTMLDivElement>("#upcoming-pipes")!;
+const gridEl = document.querySelector<HTMLDivElement>("#grid")!;
+const timeEl = document.querySelector<HTMLSpanElement>("#time")!;
+const countdownEl = document.querySelector<HTMLDivElement>("#countdown")!;
 
-/*
- * Create start and end tiles to place on grid
- */
-//const grid = new Grid(fixtureStart, fixtureEnd, fixtureTiles);
-const grid = new Grid();
+// Set global CSS variable to adjust layout to number of grid cols
+document.documentElement.style.setProperty("--num-cols", `${GRID_COLS}`);
 
-// Global state for the win
-let gameLoop: number;
-let win = false;
-let end = false;
+type Game = {
+  win: boolean;
+  end: boolean;
+  loop: number;
+  score: number;
+};
 
-// Start the panic!
-function panic() {
-  // Always render start tile when game starts
-  animateTile(grid.startTile);
-  gameLoop = window.setInterval(tick, 1000);
+function init() {
+  //const grid = new Grid(fixtureStart, fixtureEnd, fixtureTiles);
+  const grid = new Grid();
+
+  let game: Game = {
+    win: false,
+    end: false,
+    loop: 0,
+    score: 0,
+  };
+
+  gridEl.innerHTML = renderGrid(grid);
+  upcomingEl.innerHTML = renderUpcomingPipes(grid.upcomingPipes);
+  gridEl.className = "game-in-progress";
+
+  countdown(function () {
+    panic(grid, game);
+  });
+
+  gridEl.addEventListener("click", (event) => {
+    handleGridClick(event.target, game, grid);
+  });
+
+  /*
+  countdownEl.addEventListener("click", (event) => {
+    handle;
+  });
+  */
 }
 
-function tick() {
+init();
+
+function countdown(fn: () => void) {
+  // Countdown
+  let timer = TIME_BEFORE_START;
+  timeEl.innerHTML = timer.toString();
+  let countdownLoop = window.setInterval(function () {
+    timer--;
+    if (timer === 0) {
+      clearInterval(countdownLoop);
+      fn();
+      countdownEl.innerHTML = "<blink>PANIC</blink>";
+      return;
+    }
+    timeEl.innerHTML = timer.toString();
+  }, 1000);
+}
+
+// Start the panic!
+function panic(grid: Grid, game: Game) {
+  // Always render start tile when game starts
+  animateTile(grid.startTile);
+  game.loop = window.setInterval(() => {
+    tick(grid, game);
+  }, 1000);
+}
+
+function tick(grid: Grid, game: Game) {
   let nextTile = grid.getConnectingTile();
 
   if (nextTile) {
@@ -60,67 +109,54 @@ function tick() {
 
     // Winning condition
     if (nextTile[1].pipe === "end") {
-      end = true;
-      win = true;
+      game.end = true;
+      game.win = true;
     }
   } else {
     // Losing condition
-    end = true;
-    win = false;
+    game.end = true;
+    game.win = false;
   }
 
-  if (end) {
+  if (game.end) {
     gridEl.className = "game-over";
-    window.clearInterval(gameLoop);
+    window.clearInterval(game.loop);
   }
-  if (end && win) {
-    // Animate end tile
+  if (game.end && game.win) {
     animateTile(grid.endTile);
     console.log("__ WINNER ___");
     countdownEl.innerHTML = "GOOD JOB - <button>Restart</button>";
   }
-  if (end && !win) {
+  if (game.end && !game.win) {
     console.log("__ LOSER ___");
     countdownEl.innerHTML = "GAME OVER - <button>Try Again</button>";
   }
 }
 
-const gridEl = document.querySelector<HTMLDivElement>("#grid")!;
-const upcomingEl = document.querySelector<HTMLDivElement>("#upcoming-pipes")!;
-const timeEl = document.querySelector<HTMLSpanElement>("#time")!;
-const countdownEl = document.querySelector<HTMLDivElement>("#countdown")!;
-
-gridEl.innerHTML = renderGrid(grid);
-upcomingEl.innerHTML = renderUpcomingPipes(upcomingPipes);
-gridEl.className = "game-in-progress";
-
-gridEl.addEventListener("click", function (event) {
-  if (end) {
+/*
+ * Handle a click event on the grid and add a new
+ * pipe to the tile if possible
+ */
+function handleGridClick(target: EventTarget | null, game: Game, grid: Grid) {
+  if (game.end) {
     return;
   }
-  const target = event.target;
   if (target instanceof HTMLElement || target instanceof SVGElement) {
     const tile = target.closest(".tile");
     if (tile instanceof HTMLElement) {
       const row = parseFloat(tile.dataset.row || "");
       const col = parseFloat(tile.dataset.col || "");
-      addPipeToGrid([row, col]);
+      addPipeToGrid([row, col], grid);
     }
   }
-});
-
-// Set global CSS variable to adjust layout to number of grid cols
-document.documentElement.style.setProperty("--num-cols", `${GRID_COLS}`);
+}
 
 /*
  * Add a new pipe to tile at given position
  */
-function addPipeToGrid([row, col]: position) {
-  let nextPipe = upcomingPipes.pop();
-  upcomingPipes.unshift(getRandomItemFromArray(Object.keys(pipes)));
-  if (!nextPipe) {
-    throw new Error("no next pipe available");
-  }
+function addPipeToGrid([row, col]: position, grid: Grid) {
+  let nextPipe = grid.getUpcomingPipe();
+
   // Check if tile already exists (eg. has a direction)
   let existingTile = grid.get([row, col]);
   // Don't allow replacing tiles that have been visited
@@ -134,30 +170,5 @@ function addPipeToGrid([row, col]: position) {
   if (tileEl !== null) {
     tileEl.outerHTML = renderPipe({ pipe: nextPipe }, row, col, false);
   }
-  upcomingEl.innerHTML = renderUpcomingPipes(upcomingPipes);
+  upcomingEl.innerHTML = renderUpcomingPipes(grid.upcomingPipes);
 }
-
-// Animate individual tile
-function animateTile(tile: Tile) {
-  let [row, col] = tile[0];
-  let tileEl = document.querySelector(
-    `div[data-row="${row}"][data-col="${col}"]`
-  );
-  if (tileEl !== null) {
-    tileEl.outerHTML = renderPipe(tile[1], row, col, true);
-  }
-}
-
-// Countdown
-let timer = TIME_BEFORE_START;
-timeEl.innerHTML = timer.toString();
-let countdownLoop = window.setInterval(function () {
-  timer--;
-  if (timer === 0) {
-    clearInterval(countdownLoop);
-    panic();
-    countdownEl.innerHTML = "<blink>PANIC</blink>";
-    return;
-  }
-  timeEl.innerHTML = timer.toString();
-}, 1000);

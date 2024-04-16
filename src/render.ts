@@ -1,10 +1,10 @@
 import { bend, straight, short, shortEnd, cross } from "./pipes";
 import { GRID_COLS, GRID_ROWS } from "./config";
-import { Grid } from "./grid";
+import { Grid, Tile, TileEntry } from "./grid";
 
 export function renderUpcomingPipes(upcomingPipes: string[]) {
   return upcomingPipes
-    .map((pipe, i) => {
+    .map((pipe) => {
       return `<div>
       ${pipe == "se" && bend}
       ${pipe == "v" && straight}
@@ -13,10 +13,19 @@ export function renderUpcomingPipes(upcomingPipes: string[]) {
       ${pipe == "nw" && `<div class="rotate-180">${bend}</div>`}
       ${pipe == "sw" && `<div class="rotate-90">${bend}</div>`}
       ${pipe == "h" && `<div class="rotate-90">${straight}</div>`}
-      ${i === upcomingPipes.length - 1 && "<span class='next'>▼</span>"}
       </div>`;
     })
     .join("");
+}
+
+export function animateTile(tile: Tile) {
+  let [row, col] = tile[0];
+  let tileEl = document.querySelector(
+    `div[data-row="${row}"][data-col="${col}"]`
+  );
+  if (tileEl !== null) {
+    tileEl.outerHTML = renderPipe(tile[1], row, col, true);
+  }
 }
 
 function renderTile(
@@ -30,13 +39,8 @@ function renderTile(
   }" data-row="${row}" data-col="${col}">${children}</div>`;
 }
 
-type Tile = {
-  pipe: string;
-  direction?: string;
-};
-
 export function renderPipe(
-  tile: Tile,
+  tile: TileEntry,
   row: number,
   col: number,
   animate: boolean

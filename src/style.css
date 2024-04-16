@@ -227,18 +227,15 @@ blink {
 #upcoming-pipes > div {
   height: 40px;
   width: 40px;
+  opacity: 0.5;
   font-size: 0;
   box-sizing: border-box;
   border-right: 1px solid var(--grid-border-color);
   border-bottom: 1px solid var(--grid-border-color);
 }
 
-#upcoming-pipes .next {
-  font-size: 12px;
-  display: block;
-  letter-spacing: 0px;
-  text-align: center;
-  margin-top: 10px;
+#upcoming-pipes > div:last-child {
+  opacity: 1;
 }
 
 #grid div.label {

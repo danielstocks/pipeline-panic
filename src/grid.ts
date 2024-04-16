@@ -1,7 +1,7 @@
 import { SetupTile, createInitialTiles } from "./create-initial-tiles";
-import { intersect, diff } from "./util";
+import { intersect, diff, getRandomItemFromArray } from "./util";
 
-type position = [row: number, col: number];
+export type position = [row: number, col: number];
 
 export type Tile = [position, TileEntry];
 
@@ -59,6 +59,7 @@ export class Grid {
 
   startTile: Tile;
   endTile: Tile;
+  upcomingPipes: string[];
 
   constructor(start?: SetupTile, end?: SetupTile, tiles: Tile[] = []) {
     this.tileMap = new Map();
@@ -77,10 +78,23 @@ export class Grid {
     for (let tile of tiles) {
       this.set(tile[0], tile[1]);
     }
+
+    this.upcomingPipes = [...Array(6).keys()].map(() => {
+      return getRandomItemFromArray(Object.keys(pipes));
+    });
   }
 
   get tiles() {
     return this.tileMap.entries();
+  }
+
+  getUpcomingPipe() {
+    let nextPipe = this.upcomingPipes.pop();
+    if (!nextPipe) {
+      throw new Error("no upcoming pipe could be found");
+    }
+    this.upcomingPipes.unshift(getRandomItemFromArray(Object.keys(pipes)));
+    return nextPipe;
   }
 
   set(key: position, tile: TileEntry) {
