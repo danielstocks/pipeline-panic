@@ -8,6 +8,7 @@ export type Tile = [position, TileEntry];
 export type TileEntry = {
   pipe: string;
   direction?: "n" | "s" | "w" | "e" | undefined;
+  initialDirection?: "n" | "s" | "w" | "e" | undefined;
 };
 
 /*
@@ -146,6 +147,7 @@ export class Grid {
     // current tile direciton
     if (nextTile) {
       let directionConnection = directionConnectionMap[direction];
+
       if (!directionConnection) {
         // TODO: if end pipe is reached here it will throw an error if it doenst connect
         throw new Error(direction + " direction has no connection");
@@ -168,6 +170,21 @@ export class Grid {
         // Extract the non-intersecting direction to set the
         // directional flow of the next pipe
         let newDirection = diff([directionConnection], pipeConnection)[0];
+
+        let initialDirection;
+
+        // Intersection pipe, can be visited twice,
+        // Keep track of the initial direction
+        if (nextTile.pipe === "c") {
+          // just get the opposiste direction
+          newDirection = directionConnectionMap[directionConnection];
+
+          // Have we already crossed once?
+          if (nextTile.direction) {
+            initialDirection = newDirection;
+          }
+        }
+
         if (!newDirection) {
           throw new Error("A direction for next tile could not be found");
         }
@@ -177,6 +194,7 @@ export class Grid {
           {
             direction: newDirection,
             pipe: nextTile.pipe,
+            initialDirection: initialDirection ? nextTile.direction : undefined,
           },
         ];
       }

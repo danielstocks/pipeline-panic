@@ -1,9 +1,3 @@
-// * 0.1 release BACKLOG *
-//------------------------
-// Intersection pipes
-// Animate insuffcient funds
-// Animate upcoming pipes
-
 import "./style.css";
 import {
   renderGrid,
@@ -13,7 +7,7 @@ import {
 } from "./render";
 import { GRID_COLS, GAME_SPEED, TIME_BEFORE_START } from "./config";
 import { Grid, position } from "./grid";
-import { fixtureStart, fixtureEnd, fixtureTiles } from "./fixture";
+// import { fixtureStart, fixtureEnd, fixtureTiles } from "./fixture";
 
 let highScore = 0;
 const upcomingEl = document.querySelector<HTMLDivElement>("#upcoming-pipes")!;
@@ -32,8 +26,8 @@ type Game = {
 };
 
 function init() {
-  const grid = new Grid(fixtureStart, fixtureEnd, fixtureTiles);
-  //const grid = new Grid();
+  //const grid = new Grid(fixtureStart, fixtureEnd, fixtureTiles);
+  const grid = new Grid();
 
   let game: Game = {
     win: false,
@@ -64,11 +58,9 @@ function init() {
 
 function renderScore(score: number) {
   const scoreEl = document.querySelector<HTMLDivElement>("#score")!;
-
   scoreEl.innerHTML = `
     <div id="current">¤${score}</div>
   `;
-
   if (highScore > 0) {
     scoreEl.innerHTML += `<div id="high">High: ¤${highScore}</div>`;
   }

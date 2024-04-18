@@ -67,7 +67,7 @@ export function renderPipe(
       if (tile.direction == "e") {
         output += `<div class="flip-90">${bend}</div>`;
       } else {
-        output += bend;
+        output += `<div>${bend}</div>`;
       }
       break;
     case "ne":
@@ -95,7 +95,7 @@ export function renderPipe(
       if (tile.direction === "n") {
         output += `<div class="rotate-180">${straight}</div>`;
       } else {
-        output += straight;
+        output += `<div>${straight}</div>`;
       }
       break;
     case "h":
@@ -106,7 +106,41 @@ export function renderPipe(
       }
       break;
     case "c":
-      output += cross;
+      if (tile.direction === "n") {
+        output += `
+        <div class="rotate-180 on-top vertical">${straight}</div>
+        <div class="rotate-90 horizontal ${
+          tile.initialDirection && "already-visisted"
+        }">${straight}</div>
+      `;
+      } else if (tile.direction == "s") {
+        output += `
+        <div class="on-top vertical ">${straight}</div>
+        <div class="rotate-90 horizontal ${
+          tile.initialDirection && "already-visisted"
+        }">${straight}</div>
+      `;
+      } else if (tile.direction == "w") {
+        output += `
+        <div class="rotate-90 horizontal">${straight}</div>
+        <div class="on-top vertical ${
+          tile.initialDirection && "already-visisted"
+        }">${straight}</div>
+      `;
+      } else if (tile.direction == "e") {
+        output += `
+        <div class="rotate-270 horizontal">${straight}</div>
+        <div class="on-top vertical ${
+          tile.initialDirection && "already-visisted"
+        }">${straight}</div>
+      `;
+      } else {
+        output += `
+        <div class="rotate-180 on-top vertical">${straight}</div>
+        <div class="rotate-90 horizontal">${straight}</div>
+      `;
+      }
+
       break;
   }
 

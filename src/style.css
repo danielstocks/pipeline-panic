@@ -82,23 +82,32 @@ body {
   letter-spacing: 0px;
 }
 
+.on-top.vertical {
+  z-index: -1;
+}
+
 .fill-pipe .fill {
   display: block;
 }
 
-.fill-pipe-animate .fill {
+.fill-pipe-animate div.already-visisted .fill {
+  animation: none;
+  display: block;
+}
+
+.fill-pipe-animate div:first-child .fill {
   display: block;
   stroke-dasharray: 1000;
   stroke-dashoffset: 1000;
   animation: dash 2000ms linear forwards;
 }
 
-.fill-pipe-animate .start-tile .fill {
+.fill-pipe-animate div.start-tile .fill {
   animation: dash 1000ms linear forwards;
   animation-delay: 1000ms;
 }
 
-.fill-pipe-animate .end-tile .fill {
+.fill-pipe-animate div.end-tile .fill {
   animation: dash 1000ms linear forwards;
 }
 
@@ -152,6 +161,17 @@ body {
   transform-box: fill-box;
   transform-origin: center;
   transform: rotate(270deg);
+}
+
+.tile  {
+  position: relative;
+}
+.on-top {
+  position: absolute;
+  height: 79px;
+  width: 79px;
+  top: 0;
+  left: 0;
 }
 
 .flip-180 {

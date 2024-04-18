@@ -2,25 +2,19 @@ import { Tile } from "./grid";
 import { SetupTile } from "./create-initial-tiles";
 
 export const fixtureTiles: Tile[] = [
-  [[2, 3], { pipe: "h" }],
-  [[3, 1], { pipe: "v" }],
+  [[3, 1], { pipe: "c" }],
   [[4, 1], { pipe: "ne" }],
   [[4, 2], { pipe: "nw" }],
-  [[3, 2], { pipe: "v" }],
+  [[3, 2], { pipe: "c" }],
   [[2, 2], { pipe: "se" }],
-  [[2, 3], { pipe: "h" }],
   [[2, 4], { pipe: "nw" }],
   [[1, 4], { pipe: "sw" }],
-  [[1, 3], { pipe: "h" }],
-  [[1, 2], { pipe: "ne" }],
-  [[0, 2], { pipe: "se" }],
-  [[0, 3], { pipe: "h" }],
-  [[0, 4], { pipe: "h" }],
-  [[0, 5], { pipe: "sw" }],
-  [[1, 5], { pipe: "v" }],
-  [[2, 5], { pipe: "v" }],
-  [[3, 5], { pipe: "nw" }],
-  [[3, 4], { pipe: "h" }],
+  [[1, 3], { pipe: "se" }],
+  [[2, 3], { pipe: "c" }],
+  [[3, 3], { pipe: "c" }],
+  [[4, 3], { pipe: "ne" }],
+  [[4, 4], { pipe: "nw" }],
+  [[3, 4], { pipe: "sw" }],
 ];
 
 export const fixtureStart: SetupTile = [
@@ -30,4 +24,4 @@ export const fixtureStart: SetupTile = [
   },
 ];
 
-export const fixtureEnd: SetupTile = [[3, 3], { direction: "e" }];
+export const fixtureEnd: SetupTile = [[1, 6], { direction: "w" }];

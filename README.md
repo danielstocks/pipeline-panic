@@ -12,7 +12,7 @@ You can play the game here: [webcloud.se/pipeline-panic](https://webcloud.se/pip
 
 Build a pipe that goes from start to end.
 
-The grid will have two pipes S (start) and E (end), your goal is to connect these pipes while earning as much Pipeline Dolares (¤) as possible. The longer the pipe, the more ¤ you are likely to earn. You will have **30 seconds** to build your pipe before the panic starts.
+The grid will have two pipes S (start) and E (end), your goal is to connect these pipes while earning as much Pipeline Dolares (¤) as possible. The longer the pipe, the more ¤ you are likely to earn. You will have **15 seconds** to build your pipe before the panic starts.
 
 Once the panic starts, pink sludge will flow from the start pipe. If you haven't completed your pipe the sludge will start leaking and the game is lost
 If you have completed the pipe and the sludge reaches the end pipe the game is won.
