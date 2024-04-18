@@ -6,7 +6,7 @@
 
 Pipeline panic is a modern browser based re-interpretation of the [Pipe Mania](https://en.wikipedia.org/wiki/Pipe_Mania) video game originally published in 1989. Built for educational purposes.
 
-You can play the game here: [webcloud.se/pipeline-panic](https://webcloud.se/pipeline-panic)
+You can play the game here: https://pipeline-panic.vercel.app
 
 ## Game objective
 
