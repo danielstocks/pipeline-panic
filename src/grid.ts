@@ -1,15 +1,28 @@
-import { SetupTile, createInitialTiles } from "./create-initial-tiles";
-import { intersect, diff, getRandomItemFromArray } from "./util";
+import { GRID_COLS, GRID_ROWS } from "./config";
+import {
+  intersect,
+  diff,
+  getRandomItemFromArray,
+  getRandomIntegerBetween,
+} from "./util";
 
 export type position = [row: number, col: number];
-
 export type Tile = [position, TileEntry];
-
+export type SetupTile = [
+  [row: number, col: number],
+  {
+    direction: Direction;
+  }
+];
 export type TileEntry = {
-  pipe: string;
-  direction?: "n" | "s" | "w" | "e" | undefined;
-  initialDirection?: "n" | "s" | "w" | "e" | undefined;
+  pipe: pipe;
+  direction?: Direction | undefined;
+  initialDirection?: Direction | undefined;
 };
+type Direction = "n" | "s" | "w" | "e";
+type pipe = "c" | "ne" | "nw" | "sw" | "se" | "v" | "h" | "start" | "end";
+const PLAYABLE_PIPES: pipe[] = ["c", "ne", "nw", "sw", "se", "v", "h"];
+const directions = ["n", "e", "s", "w"] as const;
 
 /*
  * A map of available pipes and which directions
@@ -21,8 +34,8 @@ export type TileEntry = {
  * ne = north-east
  * ...
  */
-export const pipes: {
-  [key: string]: ("n" | "e" | "s" | "w")[];
+const pipeConnections: {
+  [K in pipe]: Direction[];
 } = {
   c: ["n", "e", "s", "w"],
   ne: ["n", "e"],
@@ -31,19 +44,19 @@ export const pipes: {
   se: ["s", "e"],
   h: ["e", "w"],
   v: ["n", "s"],
+  start: [],
+  end: [],
 };
 
 /*
  * A list of directions and what directions they
  * connec with. eg. South connects with north
  */
-const directionConnectionMap: {
-  [key: string]: "n" | "e" | "s" | "w";
-} = {
-  s: "n",
+const oppositeDirections: { [K in Direction]: Direction } = {
   n: "s",
-  e: "w",
+  s: "n",
   w: "e",
+  e: "w",
 };
 
 /*
@@ -57,10 +70,9 @@ const directionConnectionMap: {
 export class Grid {
   private tileMap: Map<string, TileEntry>;
   visited: [row: number, col: number][];
-
   startTile: Tile;
   endTile: Tile;
-  upcomingPipes: string[];
+  upcomingPipes: pipe[];
 
   constructor(start?: SetupTile, end?: SetupTile, tiles: Tile[] = []) {
     this.tileMap = new Map();
@@ -75,26 +87,23 @@ export class Grid {
     this.set(...endTile);
 
     this.visited = [];
-    this.visit(startTile[0]);
+
+    this.#visit(startTile[0]);
     for (let tile of tiles) {
       this.set(tile[0], tile[1]);
     }
 
     this.upcomingPipes = [...Array(6).keys()].map(() => {
-      return getRandomItemFromArray(Object.keys(pipes));
+      return getRandomItemFromArray(PLAYABLE_PIPES);
     });
   }
 
-  get tiles() {
-    return this.tileMap.entries();
-  }
-
-  getUpcomingPipe() {
+  getUpcomingPipe(): pipe {
     let nextPipe = this.upcomingPipes.pop();
     if (!nextPipe) {
       throw new Error("no upcoming pipe could be found");
     }
-    this.upcomingPipes.unshift(getRandomItemFromArray(Object.keys(pipes)));
+    this.upcomingPipes.unshift(getRandomItemFromArray(PLAYABLE_PIPES));
     return nextPipe;
   }
 
@@ -106,11 +115,25 @@ export class Grid {
     return this.tileMap.get(`${key[0]},${key[1]}`);
   }
 
-  visit([row, col]: position) {
+  #visit([row, col]: position) {
     this.visited.push([row, col]);
   }
 
-  getLastVisitedTile(): Tile {
+  visitNextTile(): Tile | void {
+    let nextTile = this.#getConnectingTile();
+    if (nextTile) {
+      this.set([nextTile[0][0], nextTile[0][1]], {
+        ...nextTile[1],
+      });
+      this.#visit(nextTile[0]);
+      return nextTile;
+    }
+  }
+
+  /*
+   * Returns the last visisted tile
+   */
+  #getLastVisitedTile(): Tile {
     let lastVisitedPosition = this.visited[this.visited.length - 1];
     if (lastVisitedPosition) {
       let lastVisitedTile = this.get(lastVisitedPosition);
@@ -118,14 +141,15 @@ export class Grid {
         return [lastVisitedPosition, lastVisitedTile];
       }
     }
+    // Should technically never happen since startTile is visited by default
     throw new Error("No last visited tile found");
   }
 
   /*
    * Takes one tile and see if it connects with another tile on the grid
    */
-  getConnectingTile(): Tile | void {
-    let [position, { direction }] = this.getLastVisitedTile();
+  #getConnectingTile(): Tile | void {
+    let [position, { direction }] = this.#getLastVisitedTile();
 
     // Shift position based on direction
     if (direction === "s") {
@@ -143,15 +167,10 @@ export class Grid {
     // Attempt to retrieve tile in shifted position
     const nextTile = this.get([position[0], position[1]]);
 
-    // if next tile exists, check wether it connects with the
+    // If next tile exists, check wether it connects with the
     // current tile direciton
     if (nextTile) {
-      let directionConnection = directionConnectionMap[direction];
-
-      if (!directionConnection) {
-        // TODO: if end pipe is reached here it will throw an error if it doenst connect
-        throw new Error(direction + " direction has no connection");
-      }
+      let directionConnection = oppositeDirections[direction];
 
       // If next pipe is end, check if it connects, if yes, return it.
       if (nextTile.pipe === "end") {
@@ -160,10 +179,7 @@ export class Grid {
         }
       }
 
-      let pipeConnection = pipes[nextTile.pipe];
-      if (!pipeConnection) {
-        throw new Error(nextTile.pipe + " pipe has no connection");
-      }
+      let pipeConnection = pipeConnections[nextTile.pipe];
 
       // Check if directionConnection and a pipeConnection intersects, eg. connects.
       if (intersect([directionConnection], pipeConnection).length === 1) {
@@ -177,7 +193,7 @@ export class Grid {
         // Keep track of the initial direction
         if (nextTile.pipe === "c") {
           // just get the opposiste direction
-          newDirection = directionConnectionMap[directionConnection];
+          newDirection = oppositeDirections[directionConnection];
 
           // Have we already crossed once?
           if (nextTile.direction) {
@@ -185,6 +201,7 @@ export class Grid {
           }
         }
 
+        // We should be able to type this?
         if (!newDirection) {
           throw new Error("A direction for next tile could not be found");
         }
@@ -200,4 +217,59 @@ export class Grid {
       }
     }
   }
+}
+
+/*
+ * Creates initial tiles (start + end) to be placed in grid
+ * in a randomized location. Makes sure they don't
+ * face an impossible direction like facing an edge,
+ * or facing eachother by ensuring a space of atleast
+ * one empty tile inbetween
+ */
+
+function createInitialTiles({
+  start,
+  end,
+}: {
+  start?: SetupTile;
+  end?: SetupTile;
+} = {}): [Tile, Tile] {
+  let startRow = start?.[0][0] || getRandomIntegerBetween(2, GRID_ROWS - 2);
+  let startCol = start?.[0][1] || getRandomIntegerBetween(2, GRID_COLS - 2);
+  let endRow = end?.[0][0] || startRow;
+  let endCol = end?.[0][1] || startCol;
+
+  const startDirection =
+    start?.[1].direction || getRandomItemFromArray([...directions]);
+  const endDirection =
+    end?.[1].direction || getRandomItemFromArray([...directions]);
+
+  let invalidEndPositions = [
+    `${startRow},${startCol}`,
+    `${startRow},${startCol + 1}`,
+    `${startRow},${startCol - 1}`,
+    `${startRow - 1},${startCol}`,
+    `${startRow - 1},${startCol + 1}`,
+    `${startRow - 1},${startCol - 1}`,
+    `${startRow + 1},${startCol}`,
+    `${startRow + 1},${startCol + 1}`,
+    `${startRow + 1},${startCol - 1}`,
+  ];
+
+  while (invalidEndPositions.includes(`${endRow},${endCol}`)) {
+    endRow = getRandomIntegerBetween(2, GRID_ROWS - 2);
+    endCol = getRandomIntegerBetween(2, GRID_COLS - 2);
+  }
+
+  const startTile: Tile = [
+    [startRow, startCol],
+    { pipe: "start", direction: startDirection },
+  ];
+
+  const endTile: Tile = [
+    [endRow, endCol],
+    { pipe: "end", direction: endDirection },
+  ];
+
+  return [startTile, endTile];
 }

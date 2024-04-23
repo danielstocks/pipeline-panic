@@ -1,5 +1,4 @@
-import { Tile } from "./grid";
-import { SetupTile } from "./create-initial-tiles";
+import { Tile, SetupTile } from "./grid";
 
 export const fixtureTiles: Tile[] = [
   [[3, 1], { pipe: "c" }],

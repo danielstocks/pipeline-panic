@@ -95,15 +95,9 @@ function panic(grid: Grid, game: Game) {
 }
 
 function tick(grid: Grid, game: Game) {
-  let nextTile = grid.getConnectingTile();
+  let nextTile = grid.visitNextTile();
 
   if (nextTile) {
-    // Update connecting tile with a new direction
-    grid.set([nextTile[0][0], nextTile[0][1]], {
-      ...nextTile[1],
-    });
-    grid.visit(nextTile[0]);
-
     // Animate next tile
     animateTile(nextTile);
 
@@ -164,7 +158,6 @@ function handleGridClick(target: EventTarget | null, game: Game, grid: Grid) {
         game.score -= 5;
       }
 
-      messageEl.innerHTML = "";
       if (result == "insufficient-funds") {
         messageEl.innerHTML = "<span>Insufficient funds</span>";
       }
