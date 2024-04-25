@@ -232,6 +232,7 @@ blink {
   border-left: 1px solid var(--grid-border-color);
   grid-template-columns: repeat(var(--num-cols), 1fr);
   margin: 20px;
+  user-select: none;
 }
 
 #grid > div {
