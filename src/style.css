@@ -1,59 +1,68 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Courier New", Courier, monospace;
   line-height: 1.4;
   font-weight: 400;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-  --num-cols: 4;
+  background-color: #222;
   --grid-border-color: #555;
+  --main-color-glow: #0cfca0;
   --main-color: #00b78b;
   --main-color-shade: rgb(0, 122, 93);
 }
-body {
+
+body,
+html {
   margin: 0;
-  display: flex;
-  min-width: 320px;
-  min-height: 100vh;
+  /* Prevent "side-scrolling" on mobile devices */
+  overflow-x: hidden;
+}
+
+#logo {
+  letter-spacing: -1px;
+  font-size: 11px;
+  padding: 5px;
+  color: var(--main-color);
+  text-shadow: 1px 1px 12px var(--main-color-glow);
+  font-weight: bold;
 }
 
 #top {
   display: flex;
-  font-size: 11px;
+  position: relative;
+  padding: 5px;
+  justify-content: space-between;
   align-items: center;
-  font-family: "Courier New", Courier, monospace;
   font-weight: bold;
   letter-spacing: 2px;
 }
 
-@keyframes dash {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
 #app {
-  justify-content: center;
-  display: flex;
-  flex-direction: column;
   margin: 0 auto;
+  max-width: 520px;
+  container-name: app;
 }
 
 #score {
-  margin-right: 20px;
-  font-size: 20px;
-  border: 1px dashed var(--main-color);
+  font-size: 14px;
+  border: 1px dashed var(--main-color-shade);
   height: 38px;
-  background-color: var(--main-color-shade);
   font-weight: 400;
   line-height: 40px;
   padding: 0 8px;
+  margin-right: 5px;
+}
+
+#bottom {
+  padding-top: 5px;
+  display: flex;
+  justify-content: space-between;
 }
 
 #countdown {
-  margin-right: 20px;
   border: 1px dashed var(--main-color);
-  height: 38px;
+  height: 34px;
   line-height: 38px;
+  font-size: 10px;
   padding: 0 8px;
 }
 
@@ -73,17 +82,136 @@ body {
   }
 }
 
-.fill {
-  display: none;
-}
-
 #high {
   font-size: 11px;
   letter-spacing: 0px;
 }
 
+@keyframes blink {
+  25% {
+    opacity: 0, 5;
+  }
+  50% {
+    opacity: 0;
+  }
+  75% {
+    opacity: 0.5;
+  }
+}
+
+button {
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--main-color);
+  color: #fff;
+  font-family: "Courier New", Courier, monospace;
+  text-transform: uppercase;
+  font-size: 11px;
+  border-radius: 20px;
+  padding: 0 8px;
+}
+
+button:hover {
+  background: darkolivegreen;
+}
+
+blink {
+  animation-name: blink;
+  color: red;
+  text-shadow: 1px 1px 12px hotpink;
+  animation-iteration-count: infinite;
+  animation-timing-function: cubic-bezier(1, 0, 0, 1);
+  animation-duration: 1s;
+}
+
+#grid {
+  display: grid;
+  margin: 0 auto;
+  gap: 1px;
+  grid-template-columns: repeat(var(--num-cols), 1fr);
+  background: #444;
+  user-select: none;
+}
+
+#grid > div {
+  position: relative;
+  font-size: 0;
+  background: #000;
+  aspect-ratio: 1;
+}
+
+.on-top {
+  position: absolute;
+  width: 100%;
+  top: 0px;
+  left: 0px;
+}
+
+#grid.game-in-progress > div.tile {
+  cursor: cell;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #grid.game-in-progress > div.tile:hover {
+    background: rgba(255, 105, 180, 0.2);
+  }
+}
+
+#grid.game-over {
+  opacity: 1;
+}
+
+#upcoming-pipes {
+  border-top: 1px solid var(--grid-border-color);
+  border-left: 1px solid var(--grid-border-color);
+  grid-template-columns: repeat(6, 1fr);
+  width: fit-content;
+  display: flex;
+}
+
+#upcoming-pipes > div {
+  height: 40px;
+  width: 40px;
+  opacity: 0.5;
+  font-size: 0;
+  box-sizing: border-box;
+  border-right: 1px solid var(--grid-border-color);
+  border-bottom: 1px solid var(--grid-border-color);
+}
+
+#upcoming-pipes > div:last-child {
+  opacity: 1;
+}
+
+#grid div.label {
+  font-size: clamp(8px, 2.5vw, 13px);
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  width: 40%;
+  height: 40%;
+  top: 50%;
+  left: 50%;
+  background: var(--main-color-shade);
+  z-index: 5;
+  transform: translate(-50%, -50%);
+}
+
+/* SVG rotation & Animation */
+@keyframes dash {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.fill {
+  display: none;
+}
+
 .on-top.vertical {
-  z-index: -1;
+  z-index: 1;
 }
 
 .fill-pipe .fill {
@@ -166,13 +294,6 @@ body {
 .tile  {
   position: relative;
 }
-.on-top {
-  position: absolute;
-  height: 79px;
-  width: 79px;
-  top: 0;
-  left: 0;
-}
 
 .flip-180 {
   transform: scaleX(-1) rotate(180deg);
@@ -188,106 +309,4 @@ body {
 
 .flip {
   transform: scaleX(-1);
-}
-
-@keyframes blink {
-  25% {
-    opacity: 0, 5;
-  }
-  50% {
-    opacity: 0;
-  }
-  75% {
-    opacity: 0.5;
-  }
-}
-
-button {
-  appearance: none;
-  background: transparent;
-  border: 1px solid var(--main-color);
-  color: #fff;
-  font-family: "Courier New", Courier, monospace;
-  text-transform: uppercase;
-  font-size: 11px;
-  border-radius: 20px;
-  padding: 0 8px;
-}
-button:hover {
-  background: darkolivegreen;
-}
-
-blink {
-  animation-name: blink;
-  color: red;
-  text-shadow: 1px 1px 12px hotpink;
-  animation-iteration-count: infinite;
-  animation-timing-function: cubic-bezier(1, 0, 0, 1);
-  animation-duration: 1s;
-}
-
-#grid {
-  display: grid;
-  border-top: 1px solid var(--grid-border-color);
-  border-left: 1px solid var(--grid-border-color);
-  grid-template-columns: repeat(var(--num-cols), 1fr);
-  margin: 20px;
-  user-select: none;
-}
-
-#grid > div {
-  height: 80px;
-  width: 80px;
-  font-size: 0;
-  position: relative;
-  box-sizing: border-box;
-  border-right: 1px solid var(--grid-border-color);
-  border-bottom: 1px solid var(--grid-border-color);
-}
-
-#grid.game-in-progress > div.tile {
-  cursor: cell;
-}
-#grid.game-in-progress > div.tile:hover {
-  background: rgba(255, 105, 180, 0.2);
-}
-
-#grid.game-over {
-  opacity: 1;
-}
-
-#upcoming-pipes {
-  border-top: 1px solid var(--grid-border-color);
-  border-left: 1px solid var(--grid-border-color);
-  grid-template-columns: repeat(6, 1fr);
-  margin: 20px;
-  width: fit-content;
-  display: flex;
-}
-
-#upcoming-pipes > div {
-  height: 40px;
-  width: 40px;
-  opacity: 0.5;
-  font-size: 0;
-  box-sizing: border-box;
-  border-right: 1px solid var(--grid-border-color);
-  border-bottom: 1px solid var(--grid-border-color);
-}
-
-#upcoming-pipes > div:last-child {
-  opacity: 1;
-}
-
-#grid div.label {
-  font-size: 10px;
-  position: absolute;
-  text-align: center;
-  font-weight: bold;
-  padding: 4px 8px;
-  top: 50%;
-  left: 50%;
-  background: rgba(0, 0, 0, 1);
-  z-index: 5;
-  transform: translate(-50%, -50%);
 }

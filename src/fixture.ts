@@ -23,4 +23,4 @@ export const fixtureStart: SetupTile = [
   },
 ];
 
-export const fixtureEnd: SetupTile = [[1, 6], { direction: "w" }];
+export const fixtureEnd: SetupTile = [[5, 1], { direction: "w" }];
