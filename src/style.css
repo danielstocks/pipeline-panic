@@ -166,6 +166,7 @@ blink {
   border-left: 1px solid var(--grid-border-color);
   grid-template-columns: repeat(6, 1fr);
   width: fit-content;
+  margin-left: 5px;
   display: flex;
 }
 
