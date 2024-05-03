@@ -7,9 +7,11 @@ import {
 } from "./render";
 import { GRID_COLS, GAME_SPEED, TIME_BEFORE_START } from "./config";
 import { Grid, position } from "./grid";
-// import { fixtureStart, fixtureEnd, fixtureTiles } from "./fixture";
+import { debounce } from "./util";
+//import { fixtureStart, fixtureEnd, fixtureTiles } from "./fixture";
 
 let highScore = 0;
+const appEl = document.querySelector<HTMLDivElement>("#app")!;
 const upcomingEl = document.querySelector<HTMLDivElement>("#upcoming-pipes")!;
 const gridEl = document.querySelector<HTMLDivElement>("#grid")!;
 const countdownEl = document.querySelector<HTMLDivElement>("#countdown")!;
@@ -47,19 +49,34 @@ function init() {
     panic(grid, game);
   });
 
+  // TODO: Fix "Memory leak" here
   gridEl.addEventListener("click", (event) => {
     handleGridClick(event.target, game, grid);
   });
-
-  countdownEl.addEventListener("click", (event) => {
-    handleCountdownClick(event.target);
-  });
 }
+
+countdownEl.addEventListener("click", (event) => {
+  handleCountdownClick(event.target);
+});
+
+// Prevent sub pixel rendering in grid
+// We want max-width of grid to be divisble
+// by number of cols + gaps otherwise width by be sub-pixels
+// and it screws up SVG rendering.
+function setGridMaxSize() {
+  let gridGaps = GRID_COLS - 1;
+  let maxWidth =
+    Math.floor((appEl.offsetWidth - gridGaps) / GRID_COLS) * GRID_COLS +
+    gridGaps;
+  gridEl.style.maxWidth = maxWidth + "px";
+}
+window.addEventListener("resize", debounce(setGridMaxSize, 50));
+setGridMaxSize();
 
 function renderScore(score: number) {
   const scoreEl = document.querySelector<HTMLDivElement>("#score")!;
   scoreEl.innerHTML = `
-    <div id="current">¤${score}</div>
+    <div id="current">Bank: ¤${score}</div>
   `;
   if (highScore > 0) {
     scoreEl.innerHTML += `<div id="high">High: ¤${highScore}</div>`;

@@ -186,7 +186,6 @@ export class Grid {
         // Extract the non-intersecting direction to set the
         // directional flow of the next pipe
         let newDirection = diff([directionConnection], pipeConnection)[0];
-
         let initialDirection;
 
         // Intersection pipe, can be visited twice,

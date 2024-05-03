@@ -19,3 +19,11 @@ export function diff<T extends string | number>(a: T[], b: T[]): T[] {
   const setA = new Set(a);
   return b.filter((value) => !setA.has(value));
 }
+
+export function debounce(fn: Function, time: number = 100) {
+  let timer: number;
+  return function (event: Event) {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(fn, time, event);
+  };
+}
