@@ -23,8 +23,6 @@ Tap/click anywhere on the grid to place a new pipe. You can also replace existin
 
 Next to the grid, you'll se a list of pipes available to you. When placing a pipe it will pick the pipe at the front of this list.
 
-https://github.com/danielstocks/pipeline-panic/assets/52788/a9fcb5cf-691f-4d3b-b754-f2ef98d0b50d
-
 ### How to earn ¤
 
 - You start with ¤50 in the bank
