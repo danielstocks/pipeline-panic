@@ -29,15 +29,16 @@ describe("Grid", () => {
         expect(grid.upcomingPipes.length).toBe(6);
       });
 
+      /*
+      // TODO: test custom start/end tiles
       describe("with custom start & end tiles", () => {
         let grid: Grid;
 
         beforeAll(() => {
           grid = new Grid();
         });
-
-        // TODO: test custom start/end tiles
       });
+      */
     });
 
     describe("Upcoming pipes", () => {
