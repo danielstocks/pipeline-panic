@@ -3,7 +3,7 @@
   line-height: 1.4;
   font-weight: 400;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #222;
+  background: radial-gradient(#555, #000);
   --grid-border-color: #555;
   --main-color-glow: #0cfca0;
   --main-color: #00b78b;
@@ -13,8 +13,15 @@
 body,
 html {
   margin: 0;
+  height: 100%;
   /* Prevent "side-scrolling" on mobile devices */
   overflow-x: hidden;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #logo {
@@ -29,7 +36,7 @@ html {
 #top {
   display: flex;
   position: relative;
-  padding: 5px;
+  padding-bottom: 5px;
   justify-content: space-between;
   align-items: center;
   font-weight: bold;
@@ -37,19 +44,27 @@ html {
 }
 
 #app {
-  margin: 0 auto;
+  flex-grow: 1;
+  padding: 10px 5px;
+  height: 100%;
+  box-sizing: border-box;
+  background: rgba(255, 105, 180, 0.1);
   max-width: 520px;
-  container-name: app;
+  max-height: 820px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 #score {
-  font-size: 14px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  font-weight: bold;
+  text-transform: uppercase;
   border: 1px dashed var(--main-color-shade);
   height: 38px;
-  font-weight: 400;
-  line-height: 40px;
+  line-height: 38px;
   padding: 0 8px;
-  margin-right: 5px;
 }
 
 #bottom {
@@ -82,9 +97,10 @@ html {
   }
 }
 
+/* #TODO: Show this in game menu later */
 #high {
+  display: none;
   font-size: 11px;
-  letter-spacing: 0px;
 }
 
 @keyframes blink {
@@ -102,13 +118,16 @@ html {
 button {
   appearance: none;
   background: transparent;
-  border: 1px solid var(--main-color);
+  border: 2px solid var(--main-color);
   color: #fff;
   font-family: "Courier New", Courier, monospace;
   text-transform: uppercase;
-  font-size: 11px;
+  font-size: 10px;
+  line-height: 14px;
+  letter-spacing: 1px;
+  font-weight: bold;
   border-radius: 20px;
-  padding: 0 8px;
+  padding: 2px 8px 0px 8px;
 }
 
 button:hover {
@@ -126,7 +145,6 @@ blink {
 
 #grid {
   display: grid;
-  margin: 0 auto;
   gap: 1px;
   grid-template-columns: repeat(var(--num-cols), 1fr);
   background: #444;
@@ -153,7 +171,7 @@ blink {
 
 @media (hover: hover) and (pointer: fine) {
   #grid.game-in-progress > div.tile:hover {
-    background: rgba(255, 105, 180, 0.2);
+    background: rgba(255, 105, 180, 0.1);
   }
 }
 
@@ -166,7 +184,6 @@ blink {
   border-left: 1px solid var(--grid-border-color);
   grid-template-columns: repeat(6, 1fr);
   width: fit-content;
-  margin-left: 5px;
   display: flex;
 }
 
