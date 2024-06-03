@@ -59,10 +59,8 @@ countdownEl.addEventListener("click", (event) => {
   handleCountdownClick(event.target);
 });
 
-// Prevent sub pixel rendering in grid
-// We want max-width of grid to be divisble
-// by number of cols + gaps otherwise width by be sub-pixels
-// and it screws up SVG rendering.
+// Make sure max-width of grid is divisble by number of cols + gaps otherwise
+// it will cause sub-pixel SVG rendering.
 function setGridMaxSize() {
   let gridGaps = GRID_COLS - 1;
   let maxWidth =
