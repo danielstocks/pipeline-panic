@@ -11,7 +11,7 @@ import { debounce } from "./util";
 //import { fixtureStart, fixtureEnd, fixtureTiles } from "./fixture";
 
 let highScore = 0;
-const appEl = document.querySelector<HTMLDivElement>("#app")!;
+
 const upcomingEl = document.querySelector<HTMLDivElement>("#upcoming-pipes")!;
 const gridEl = document.querySelector<HTMLDivElement>("#grid")!;
 const countdownEl = document.querySelector<HTMLDivElement>("#countdown")!;
@@ -44,12 +44,11 @@ function init() {
   countdownEl.innerHTML = "PANIC IN: <span id='time'></span>";
 
   renderScore(game.score);
-
   countdown(function () {
     panic(grid, game);
   });
 
-  // TODO: Fix "Memory leak" here
+  // TODO: Fix "Memory leak" here when game restarts
   gridEl.addEventListener("click", (event) => {
     handleGridClick(event.target, game, grid);
   });
@@ -64,12 +63,13 @@ countdownEl.addEventListener("click", (event) => {
 function setGridMaxSize() {
   let gridGaps = GRID_COLS - 1;
   let maxWidth =
-    Math.floor((appEl.offsetWidth - gridGaps) / GRID_COLS) * GRID_COLS +
+    Math.floor((gridEl.offsetWidth - gridGaps) / GRID_COLS) * GRID_COLS +
     gridGaps;
   gridEl.style.maxWidth = maxWidth + "px";
 }
 window.addEventListener("resize", debounce(setGridMaxSize, 50));
-setGridMaxSize();
+// Set timeout here because iOS Safari somtimes runs it before DOM has loaded fully?
+window.setTimeout(setGridMaxSize, 100);
 
 function renderScore(score: number) {
   const scoreEl = document.querySelector<HTMLDivElement>("#score")!;
@@ -202,10 +202,13 @@ function addPipeToGrid(
   grid: Grid,
   score: number
 ): ("new" | "replacement" | "insufficient-funds") | void {
-  let nextPipe = grid.getUpcomingPipe();
+  if (score < 1) {
+    return "insufficient-funds";
+  }
 
   // Check if tile already exists (eg. has a direction)
   let existingTile = grid.get([row, col]);
+
   // Don't allow replacing tiles that have been visited
   if (existingTile?.direction) {
     return;
@@ -214,6 +217,8 @@ function addPipeToGrid(
   if (existingTile && score < 5) {
     return "insufficient-funds";
   }
+
+  let nextPipe = grid.getUpcomingPipe();
 
   grid.set([row, col], { pipe: nextPipe });
 
