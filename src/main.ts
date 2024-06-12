@@ -69,7 +69,7 @@ function setGridMaxSize() {
 }
 window.addEventListener("resize", debounce(setGridMaxSize, 50));
 // Set timeout here because iOS Safari somtimes runs it before DOM has loaded fully?
-window.setTimeout(setGridMaxSize, 10);
+window.setTimeout(setGridMaxSize, 100);
 
 function renderScore(score: number) {
   const scoreEl = document.querySelector<HTMLDivElement>("#score")!;
