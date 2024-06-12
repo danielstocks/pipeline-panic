@@ -44,7 +44,6 @@ function init() {
   countdownEl.innerHTML = "PANIC IN: <span id='time'></span>";
 
   renderScore(game.score);
-
   countdown(function () {
     panic(grid, game);
   });
@@ -54,6 +53,8 @@ function init() {
     handleGridClick(event.target, game, grid);
   });
 }
+
+// TODO: Bug possible to go below 0.
 
 countdownEl.addEventListener("click", (event) => {
   handleCountdownClick(event.target);
@@ -67,10 +68,10 @@ function setGridMaxSize() {
     Math.floor((appEl.offsetWidth - gridGaps) / GRID_COLS) * GRID_COLS +
     gridGaps;
   gridEl.style.maxWidth = maxWidth + "px";
-  alert(`debug ${maxWidth}`);
 }
 window.addEventListener("resize", debounce(setGridMaxSize, 50));
-setGridMaxSize();
+// Set timeout here because iOS Safari somtimes runs it before DOM has loaded fully?
+window.setTimeout(setGridMaxSize, 10);
 
 function renderScore(score: number) {
   const scoreEl = document.querySelector<HTMLDivElement>("#score")!;
@@ -205,8 +206,13 @@ function addPipeToGrid(
 ): ("new" | "replacement" | "insufficient-funds") | void {
   let nextPipe = grid.getUpcomingPipe();
 
+  if (score < 1) {
+    return "insufficient-funds";
+  }
+
   // Check if tile already exists (eg. has a direction)
   let existingTile = grid.get([row, col]);
+
   // Don't allow replacing tiles that have been visited
   if (existingTile?.direction) {
     return;
