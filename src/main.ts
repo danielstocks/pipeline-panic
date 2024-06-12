@@ -155,10 +155,9 @@ function handleGridClick(target: EventTarget | null, game: Game, grid: Grid) {
   if (game.end) {
     return;
   }
-  if (game.score <= 0) {
-    messageEl.innerHTML = "<span>Insufficient funds</span>";
-    return;
-  }
+
+  messageEl.innerHTML = "";
+
   if (target instanceof HTMLElement || target instanceof SVGElement) {
     const tile = target.closest(".tile");
     if (tile instanceof HTMLElement) {
