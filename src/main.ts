@@ -67,6 +67,7 @@ function setGridMaxSize() {
     Math.floor((appEl.offsetWidth - gridGaps) / GRID_COLS) * GRID_COLS +
     gridGaps;
   gridEl.style.maxWidth = maxWidth + "px";
+  alert(`debug ${maxWidth}`);
 }
 window.addEventListener("resize", debounce(setGridMaxSize, 50));
 setGridMaxSize();
