@@ -48,13 +48,11 @@ function init() {
     panic(grid, game);
   });
 
-  // TODO: Fix "Memory leak" here
+  // TODO: Fix "Memory leak" here when game restarts
   gridEl.addEventListener("click", (event) => {
     handleGridClick(event.target, game, grid);
   });
 }
-
-// TODO: Bug possible to go below 0.
 
 countdownEl.addEventListener("click", (event) => {
   handleCountdownClick(event.target);
