@@ -95,7 +95,7 @@ body {
   font-weight: bold;
   letter-spacing: 2px;
   z-index: 5;
-  //animation: fade-out 0.5s 1;
+  animation: fade-out 0.5s 1;
   animation-fill-mode: forwards;
   animation-delay: 2s;
 }
