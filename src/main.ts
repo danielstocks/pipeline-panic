@@ -11,7 +11,7 @@ import { debounce } from "./util";
 //import { fixtureStart, fixtureEnd, fixtureTiles } from "./fixture";
 
 let highScore = 0;
-const appEl = document.querySelector<HTMLDivElement>("#app")!;
+
 const upcomingEl = document.querySelector<HTMLDivElement>("#upcoming-pipes")!;
 const gridEl = document.querySelector<HTMLDivElement>("#grid")!;
 const countdownEl = document.querySelector<HTMLDivElement>("#countdown")!;
