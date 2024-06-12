@@ -166,6 +166,9 @@ blink {
   user-select: none;
   /* prevent double tap to zoom on mobile */
   touch-action: manipulation;
+  /* center grid */
+  margin: 0 auto;
+  width: 100%;
 }
 
 #grid > div {
