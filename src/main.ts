@@ -202,8 +202,6 @@ function addPipeToGrid(
   grid: Grid,
   score: number
 ): ("new" | "replacement" | "insufficient-funds") | void {
-  let nextPipe = grid.getUpcomingPipe();
-
   if (score < 1) {
     return "insufficient-funds";
   }
@@ -219,6 +217,8 @@ function addPipeToGrid(
   if (existingTile && score < 5) {
     return "insufficient-funds";
   }
+
+  let nextPipe = grid.getUpcomingPipe();
 
   grid.set([row, col], { pipe: nextPipe });
 
