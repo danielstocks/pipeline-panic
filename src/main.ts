@@ -63,7 +63,7 @@ countdownEl.addEventListener("click", (event) => {
 function setGridMaxSize() {
   let gridGaps = GRID_COLS - 1;
   let maxWidth =
-    Math.floor((appEl.offsetWidth - gridGaps) / GRID_COLS) * GRID_COLS +
+    Math.floor((gridEl.offsetWidth - gridGaps) / GRID_COLS) * GRID_COLS +
     gridGaps;
   gridEl.style.maxWidth = maxWidth + "px";
 }
