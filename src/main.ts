@@ -31,7 +31,7 @@ function init() {
   //const grid = new Grid(fixtureStart, fixtureEnd, fixtureTiles);
   const grid = new Grid();
 
-  let game: Game = {
+  const game: Game = {
     win: false,
     end: false,
     loop: 0,
@@ -61,8 +61,8 @@ countdownEl.addEventListener("click", (event) => {
 // Make sure max-width of grid is divisble by number of cols + gaps otherwise
 // it will cause sub-pixel SVG rendering.
 function setGridMaxSize() {
-  let gridGaps = GRID_COLS - 1;
-  let maxWidth =
+  const gridGaps = GRID_COLS - 1;
+  const maxWidth =
     Math.floor((gridEl.offsetWidth - gridGaps) / GRID_COLS) * GRID_COLS +
     gridGaps;
   gridEl.style.maxWidth = maxWidth + "px";
@@ -88,7 +88,7 @@ function countdown(fn: () => void) {
   const timeEl = document.querySelector<HTMLSpanElement>("#time")!;
   let timer = TIME_BEFORE_START;
   timeEl.innerHTML = timer.toString();
-  let countdownLoop = window.setInterval(function () {
+  const countdownLoop = window.setInterval(function () {
     timer--;
     if (timer === 0) {
       clearInterval(countdownLoop);
@@ -110,7 +110,7 @@ function panic(grid: Grid, game: Game) {
 }
 
 function tick(grid: Grid, game: Game) {
-  let nextTile = grid.visitNextTile();
+  const nextTile = grid.visitNextTile();
 
   if (nextTile) {
     // Animate next tile
@@ -163,7 +163,7 @@ function handleGridClick(target: EventTarget | null, game: Game, grid: Grid) {
     if (tile instanceof HTMLElement) {
       const row = parseFloat(tile.dataset.row || "");
       const col = parseFloat(tile.dataset.col || "");
-      let result = addPipeToGrid([row, col], grid, game.score);
+      const result = addPipeToGrid([row, col], grid, game.score);
 
       if (result == "new") {
         game.score -= 1;
@@ -200,14 +200,14 @@ function handleCountdownClick(target: EventTarget | null) {
 function addPipeToGrid(
   [row, col]: position,
   grid: Grid,
-  score: number
+  score: number,
 ): ("new" | "replacement" | "insufficient-funds") | void {
   if (score < 1) {
     return "insufficient-funds";
   }
 
   // Check if tile already exists (eg. has a direction)
-  let existingTile = grid.get([row, col]);
+  const existingTile = grid.get([row, col]);
 
   // Don't allow replacing tiles that have been visited
   if (existingTile?.direction) {
@@ -218,12 +218,12 @@ function addPipeToGrid(
     return "insufficient-funds";
   }
 
-  let nextPipe = grid.getUpcomingPipe();
+  const nextPipe = grid.getUpcomingPipe();
 
   grid.set([row, col], { pipe: nextPipe });
 
-  let tileEl = document.querySelector(
-    `div[data-row="${row}"][data-col="${col}"]`
+  const tileEl = document.querySelector(
+    `div[data-row="${row}"][data-col="${col}"]`,
   );
   if (tileEl !== null) {
     tileEl.outerHTML = renderPipe({ pipe: nextPipe }, row, col, false);

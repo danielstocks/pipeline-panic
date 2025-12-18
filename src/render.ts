@@ -19,9 +19,9 @@ export function renderUpcomingPipes(upcomingPipes: string[]) {
 }
 
 export function animateTile(tile: Tile) {
-  let [row, col] = tile[0];
-  let tileEl = document.querySelector(
-    `div[data-row="${row}"][data-col="${col}"]`
+  const [row, col] = tile[0];
+  const tileEl = document.querySelector(
+    `div[data-row="${row}"][data-col="${col}"]`,
   );
   if (tileEl !== null) {
     tileEl.outerHTML = renderPipe(tile[1], row, col, true);
@@ -32,7 +32,7 @@ function renderTile(
   row: number,
   col: number,
   children: string = "",
-  className: string = ""
+  className: string = "",
 ) {
   return `<div class="${
     className || "tile"
@@ -43,7 +43,7 @@ export function renderPipe(
   tile: TileEntry,
   row: number,
   col: number,
-  animate: boolean
+  animate: boolean,
 ) {
   let output = "";
   let fill = "";
@@ -155,9 +155,9 @@ export function renderGrid(tiles: Grid) {
   let gridOutput = "";
 
   for (let i = 0; i < GRID_ROWS * GRID_COLS; i++) {
-    let row = Math.floor(i / GRID_COLS);
-    let col = i % GRID_COLS;
-    let tile = tiles.get([row, col]);
+    const row = Math.floor(i / GRID_COLS);
+    const col = i % GRID_COLS;
+    const tile = tiles.get([row, col]);
 
     if (typeof tile === "undefined") {
       gridOutput += renderTile(row, col);

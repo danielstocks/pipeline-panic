@@ -12,7 +12,7 @@ export type SetupTile = [
   [row: number, col: number],
   {
     direction: Direction;
-  }
+  },
 ];
 export type TileEntry = {
   pipe: pipe;
@@ -89,7 +89,7 @@ export class Grid {
     this.visited = [];
 
     this.#visit(startTile[0]);
-    for (let tile of tiles) {
+    for (const tile of tiles) {
       this.set(tile[0], tile[1]);
     }
 
@@ -99,7 +99,7 @@ export class Grid {
   }
 
   getUpcomingPipe(): pipe {
-    let nextPipe = this.upcomingPipes.pop();
+    const nextPipe = this.upcomingPipes.pop();
     if (!nextPipe) {
       throw new Error("no upcoming pipe could be found");
     }
@@ -120,7 +120,7 @@ export class Grid {
   }
 
   visitNextTile(): Tile | void {
-    let nextTile = this.#getConnectingTile();
+    const nextTile = this.#getConnectingTile();
     if (nextTile) {
       this.set([nextTile[0][0], nextTile[0][1]], {
         ...nextTile[1],
@@ -134,9 +134,9 @@ export class Grid {
    * Returns the last visisted tile
    */
   #getLastVisitedTile(): Tile {
-    let lastVisitedPosition = this.visited[this.visited.length - 1];
+    const lastVisitedPosition = this.visited[this.visited.length - 1];
     if (lastVisitedPosition) {
-      let lastVisitedTile = this.get(lastVisitedPosition);
+      const lastVisitedTile = this.get(lastVisitedPosition);
       if (lastVisitedTile) {
         return [lastVisitedPosition, lastVisitedTile];
       }
@@ -149,7 +149,7 @@ export class Grid {
    * Takes one tile and see if it connects with another tile on the grid
    */
   #getConnectingTile(): Tile | void {
-    let [position, { direction }] = this.#getLastVisitedTile();
+    const [position, { direction }] = this.#getLastVisitedTile();
 
     // Shift position based on direction
     if (direction === "s") {
@@ -170,7 +170,7 @@ export class Grid {
     // If next tile exists, check wether it connects with the
     // current tile direciton
     if (nextTile) {
-      let directionConnection = oppositeDirections[direction];
+      const directionConnection = oppositeDirections[direction];
 
       // If next pipe is end, check if it connects, if yes, return it.
       if (nextTile.pipe === "end") {
@@ -179,7 +179,7 @@ export class Grid {
         }
       }
 
-      let pipeConnection = pipeConnections[nextTile.pipe];
+      const pipeConnection = pipeConnections[nextTile.pipe];
 
       // Check if directionConnection and a pipeConnection intersects, eg. connects.
       if (intersect([directionConnection], pipeConnection).length === 1) {
@@ -233,8 +233,8 @@ function createInitialTiles({
   start?: SetupTile;
   end?: SetupTile;
 } = {}): [Tile, Tile] {
-  let startRow = start?.[0][0] || getRandomIntegerBetween(2, GRID_ROWS - 2);
-  let startCol = start?.[0][1] || getRandomIntegerBetween(2, GRID_COLS - 2);
+  const startRow = start?.[0][0] || getRandomIntegerBetween(2, GRID_ROWS - 2);
+  const startCol = start?.[0][1] || getRandomIntegerBetween(2, GRID_COLS - 2);
   let endRow = end?.[0][0] || startRow;
   let endCol = end?.[0][1] || startCol;
 
@@ -243,7 +243,7 @@ function createInitialTiles({
   const endDirection =
     end?.[1].direction || getRandomItemFromArray([...directions]);
 
-  let invalidEndPositions = [
+  const invalidEndPositions = [
     `${startRow},${startCol}`,
     `${startRow},${startCol + 1}`,
     `${startRow},${startCol - 1}`,

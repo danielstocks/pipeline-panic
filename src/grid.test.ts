@@ -20,7 +20,7 @@ describe("Grid", () => {
       });
 
       test("visits the start tile", () => {
-        let [row, col] = grid.startTile[0];
+        const [row, col] = grid.startTile[0];
         expect(grid.visited.length).toBe(1);
         expect(grid.visited[0]).toEqual([row, col]);
       });
@@ -32,8 +32,8 @@ describe("Grid", () => {
 
     describe("Upcoming pipes", () => {
       test("get upcoming pipe", () => {
-        let grid = new Grid();
-        let nextPipe = grid.upcomingPipes[grid.upcomingPipes.length - 1]!;
+        const grid = new Grid();
+        const nextPipe = grid.upcomingPipes[grid.upcomingPipes.length - 1]!;
         expect(grid.getUpcomingPipe()).toEqual(nextPipe);
       });
     });
@@ -50,19 +50,19 @@ describe("Grid", () => {
       });
 
       test("get pipe", () => {
-        let tile = grid.get([1, 1]);
+        const tile = grid.get([1, 1]);
         expect(tile?.pipe).toBe("c");
       });
     });
 
     describe("vist next tile", () => {
       test("no tile in next position", () => {
-        let grid = new Grid();
+        const grid = new Grid();
         expect(grid.visitNextTile()).toBe(undefined);
       });
 
       test("tile in next position that connects", () => {
-        let grid = new Grid(fixtureStart, fixtureEnd, fixtureTiles);
+        const grid = new Grid(fixtureStart, fixtureEnd, fixtureTiles);
         expect(grid.visitNextTile()).toEqual([
           [3, 1],
           {
@@ -74,7 +74,7 @@ describe("Grid", () => {
       });
 
       test("tile in next position but no connection", () => {
-        let grid = new Grid(fixtureStart, fixtureEnd);
+        const grid = new Grid(fixtureStart, fixtureEnd);
         expect(grid.visitNextTile()).toBe(undefined);
       });
 
