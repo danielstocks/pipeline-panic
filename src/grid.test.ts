@@ -1,4 +1,4 @@
-import { describe, expect, test, beforeAll } from "bun:test";
+import { describe, expect, test, beforeAll } from "vitest";
 import { Grid } from "./grid";
 import { fixtureStart, fixtureEnd, fixtureTiles } from "./fixture";
 
@@ -28,17 +28,6 @@ describe("Grid", () => {
       test("creates 6 upcoming pipes", () => {
         expect(grid.upcomingPipes.length).toBe(6);
       });
-
-      /*
-      // TODO: test custom start/end tiles
-      describe("with custom start & end tiles", () => {
-        let grid: Grid;
-
-        beforeAll(() => {
-          grid = new Grid();
-        });
-      });
-      */
     });
 
     describe("Upcoming pipes", () => {
