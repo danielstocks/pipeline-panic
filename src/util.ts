@@ -1,5 +1,5 @@
 export function getRandomItemFromArray<T>(array: T[]) {
-  let random = array[Math.floor(Math.random() * array.length)];
+  const random = array[Math.floor(Math.random() * array.length)];
   if (random === undefined) {
     throw Error("Could not get random item from array " + array);
   }
@@ -20,8 +20,8 @@ export function diff<T extends string | number>(a: T[], b: T[]): T[] {
   return b.filter((value) => !setA.has(value));
 }
 
-export function debounce(fn: Function, time: number = 100) {
-  let timer: number;
+export function debounce(fn: () => void, time: number = 100) {
+  let timer: Timer;
   return function (event: Event) {
     if (timer) clearTimeout(timer);
     timer = setTimeout(fn, time, event);
