@@ -35,13 +35,3 @@ Be careful! You can't go below ¤0, meaning you won't be able to replace or plac
 If there is a leak, all your money is lost and the game is over.
 
 Good luck!
-
-
-## Development
-
-Dependencies: bun, lcov (brew install lcov)
-
-
-### Code coverage
-
-Waiting for bun to resolve: https://github.com/oven-sh/bun/issues/7100
